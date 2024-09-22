@@ -426,7 +426,7 @@ const AppProvider = ({ children }) => {
 
       await batch.commit();
 
-      showAlert("success", "All academic data deleted!");
+      showAlert("warning", "All academic data deleted!");
 
       const expectedHeaders = [
         "DEPT",

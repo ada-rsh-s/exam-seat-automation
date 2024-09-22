@@ -294,7 +294,7 @@ const BatchesForm = () => {
             <Button
               type="primary"
               htmlType="submit"
-              disabled={allFieldsFilled()}
+              disabled={!allFieldsFilled()}
             >
               Submit
             </Button>

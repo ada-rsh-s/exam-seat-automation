@@ -53,6 +53,8 @@ const FileContainer = () => {
 
         setProgress(0);
         setWorkbook(null);
+        localStorage.removeItem("depts");
+        localStorage.removeItem("selectedYear");
       }
     } catch (error) {
       setUploading(true);

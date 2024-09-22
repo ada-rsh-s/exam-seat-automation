@@ -75,6 +75,8 @@ const AppProvider = ({ children }) => {
 
   const removeUserFromTheLocalStorage = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("depts");
+    localStorage.removeItem("selectedYear");
   };
 
   const setupUser = async ({ currentUser, endPoint }) => {

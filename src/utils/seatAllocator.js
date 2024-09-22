@@ -429,12 +429,13 @@ export const test = (
           class: classNames[idx],
           items: consolidatedItems,
           count: counts,
+          index: idx,
         };
       }
       return null; // Exclude empty objects
     })
     .filter(Boolean);
-  
+   
 
   //   function attendanceSheet(singleClass, className) {
   //     const oddIndexedStudents = [];

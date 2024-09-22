@@ -68,11 +68,11 @@ const NoticeTable = () => {
     },
     {
       name: "Hall arrangement",
-      selector: (row, i) => (
+      selector: (row) => (
         <Button
           className="printbutton"
-          onClick={() => handleClick(i)}
-          key={i}
+          onClick={() => handleClick(row.index)}
+          key={row.index}
           type="primary"
         >
           Print Hall
@@ -89,7 +89,6 @@ const NoticeTable = () => {
     searchTerm,
     setSearchTerm,
     dateTime,
-    disablepagination: true,
   };
 
   return (

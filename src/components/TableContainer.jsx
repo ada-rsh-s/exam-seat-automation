@@ -47,7 +47,6 @@ const TableContainer = ({
   selectableRowSelected,
   handleRowSelected,
   dateTime,
-  disablepagination,
 }) => {
   return (
     <div className="table-container">
@@ -97,7 +96,7 @@ const TableContainer = ({
             columns={columns}
             data={filteredResults}
             defaultSortAsc={true}
-            pagination={disablepagination ? false : true}
+            pagination={true}
             paginationPerPage={10}
             theme="custom"
             customStyles={tableCustomStyles}

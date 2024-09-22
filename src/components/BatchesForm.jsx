@@ -10,7 +10,7 @@ const BatchesForm = () => {
   const navigate = useNavigate();
   const { batchesForm, fetchExamOptions } = useAppContext();
 
-  const [depts, setDepts] = useState([]); // Holds the department data
+  const [depts, setDepts] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const hasLoaded = useRef(false);
   const [form] = Form.useForm();
@@ -93,7 +93,6 @@ const BatchesForm = () => {
     }
   }, [form]);
 
-  // Save to localStorage
   useEffect(() => {
     if (hasLoaded.current) {
       localStorage.setItem("depts", JSON.stringify(depts));
@@ -170,8 +169,8 @@ const BatchesForm = () => {
                 <Form.Item
                   label="Regular Strength"
                   name={`reg${dept.name}`}
-                  // initialValue={dept.reg}
-                  initialValue={dept.reg || 20}
+                  initialValue={dept.reg}
+                  // initialValue={dept.reg || 20}
                   rules={[
                     {
                       required: true,
@@ -185,8 +184,8 @@ const BatchesForm = () => {
                     max={500}
                     placeholder="Regular Strength"
                     style={{ width: "200px", marginRight: "40px" }}
-                    // value={dept.reg}
-                    value={dept.reg || 20}
+                    value={dept.reg}
+                    // value={dept.reg || 20}
                     onChange={(value) =>
                       handleFieldChange("reg", value, dept.name)
                     }
@@ -196,8 +195,8 @@ const BatchesForm = () => {
                 <Form.Item
                   label="LET Strength"
                   name={`let${dept.name}`}
-                  // initialValue={dept.let}
-                  initialValue={dept.let || 20}
+                  initialValue={dept.let}
+                  // initialValue={dept.let || 20}
                   rules={[
                     { required: true, message: "Please enter LET Strength" },
                   ]}
@@ -208,8 +207,8 @@ const BatchesForm = () => {
                     max={40}
                     placeholder="LET Strength"
                     style={{ width: "200px", marginRight: "40px" }}
-                    // value={dept.let}
-                    value={dept.let || 20}
+                    value={dept.let}
+                    // value={dept.let || 20}
                     onChange={(value) =>
                       handleFieldChange("let", value, dept.name)
                     }
@@ -286,8 +285,8 @@ const BatchesForm = () => {
           ))}
         <Form.Item>
           <Popconfirm
-            // onConfirm={allFieldsFilled() ? submitForm : null}
-            onConfirm={!allFieldsFilled() ? submitForm : null}
+            onConfirm={allFieldsFilled() ? submitForm : null}
+            // onConfirm={!allFieldsFilled() ? submitForm : null}
             title="Current year exams data will be overwritten!"
             description="Are you sure you want to submit?"
             icon={<QuestionCircleOutlined style={{ color: "red" }} />}
@@ -295,7 +294,7 @@ const BatchesForm = () => {
             <Button
               type="primary"
               htmlType="submit"
-              // disabled={!allFieldsFilled()}
+              disabled={allFieldsFilled()}
             >
               Submit
             </Button>

@@ -218,16 +218,14 @@ const AppProvider = ({ children }) => {
     }
   };
   const fetchBatches = async (academicYear) => {
-    console.log(academicYear.year());
+     showAlert("loading", "Fetching Batches ...");
     const years = [
       academicYear.year().toString().slice(-2),
       (academicYear.year() - 1).toString().slice(-2),
       (academicYear.year() - 2).toString().slice(-2),
       (academicYear.year() - 3).toString().slice(-2),
     ];
-    console.log(years);
 
-    // showAlert("loading", "Fetching Batch Details ...");
     const examsRef = doc(firestore, "DeptDetails", "Exams");
     const regStrengthRef = doc(firestore, "DeptDetails", "RegularStrength");
     const letStrengthRef = doc(firestore, "DeptDetails", "LetStrength");
@@ -289,7 +287,6 @@ const AppProvider = ({ children }) => {
           });
         });
       }
-      console.log(formattedData);
 
       return formattedData;
     } catch (error) {
@@ -397,7 +394,7 @@ const AppProvider = ({ children }) => {
   };
 
   const uploadSubFile = async (workbook, updateProgress, cancelToken) => {
-    showAlert("warning", "Deleting current academic data ...");
+    showAlert("loading", "Deleting current academic data ...");
     const subjectsCollection = collection(db, "Subjects");
     const slotsDocRef = doc(db, "AllExams", "Slots");
     const editedSlotsDocRef = doc(db, "AllExams", "EditedSlots");
@@ -426,7 +423,8 @@ const AppProvider = ({ children }) => {
 
       await batch.commit();
 
-      showAlert("warning", "All academic data deleted!");
+      showAlert("warning", "All academic data deleted !");
+      showAlert("loading", "Uploading new file...");
 
       const expectedHeaders = [
         "DEPT",

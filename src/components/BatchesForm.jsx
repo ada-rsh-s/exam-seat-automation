@@ -55,8 +55,6 @@ const BatchesForm = () => {
       depts.every(
         (dept) =>
           dept.initialValues.length > 0 &&
-          dept.reg &&
-          dept.let &&
           isDroppedValid(dept.drop) &&
           isRejoinedValid(dept.rejoin)
       )

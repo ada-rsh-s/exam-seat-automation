@@ -347,10 +347,40 @@ export const test = (
       }
     });
 
-    return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
-      nums.sort((a, b) => a - b);
+    const mergedGroupedItems = {};
+
+    Object.keys(groupedItems).forEach((key) => {
+      const deptCode = key.match(/\d{2}[A-Z]{2}/)[0]; // Extract the department code
+
+      if (key.startsWith("JEC")) {
+        const firstElement = groupedItems[key][0];
+        const lastElement = groupedItems[key][groupedItems[key].length - 1];
+
+        const ljecKey = `LJEC${deptCode}`;
+        if (groupedItems[ljecKey]) {
+          const lastElementLJEC =
+            groupedItems[ljecKey][groupedItems[ljecKey].length - 1];
+
+          mergedGroupedItems[key] = [firstElement, lastElementLJEC];
+        } else {
+          mergedGroupedItems[key] = [firstElement, lastElement];
+        }
+      }
+    });
+
+    return Object.entries(mergedGroupedItems).flatMap(([prefix, nums]) => {
+      let lastterm = "";
+      if (
+        nums[nums.length - 1] >
+        deptStrength[prefix.slice(-4)] - letStrength[prefix.slice(-4)]
+      ) {
+        lastterm = `L${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      } else {
+        lastterm = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      }
       const first = `${prefix}${formatToThreeDigits(nums[0])}`;
-      const last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      const last = lastterm;
+
       return [first, last];
     });
   };
@@ -435,7 +465,6 @@ export const test = (
       return null; // Exclude empty objects
     })
     .filter(Boolean);
-   
 
   //   function attendanceSheet(singleClass, className) {
   //     const oddIndexedStudents = [];

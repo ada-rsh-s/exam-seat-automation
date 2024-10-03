@@ -344,31 +344,31 @@ export const test = (
 
         if (!groupedItems[prefix]) groupedItems[prefix] = [];
         groupedItems[prefix].push(Number(num));
+        groupedItems[prefix].sort((a, b) => a - b);
       }
     });
 
-    const mergedGroupedItems = {};
+    const sortedKeys = Object.keys(groupedItems).sort((a, b) => {
+      const deptA = a.match(/\d+/)[0];
+      const deptB = b.match(/\d+/)[0];
+      return deptA.localeCompare(deptB);
+    });
 
-    Object.keys(groupedItems).forEach((key) => {
-      const deptCode = key.match(/\d{2}[A-Z]{2}/)[0]; // Extract the department code
+    sortedKeys.forEach((key) => {
+      let ljecKey;
 
-      if (key.startsWith("JEC")) {
-        const firstElement = groupedItems[key][0];
-        const lastElement = groupedItems[key][groupedItems[key].length - 1];
+      if (key.startsWith("L")) ljecKey = `${key}`;
+      else ljecKey = `L${key}`;
 
-        const ljecKey = `LJEC${deptCode}`;
-        if (groupedItems[ljecKey]) {
-          const lastElementLJEC =
-            groupedItems[ljecKey][groupedItems[ljecKey].length - 1];
-
-          mergedGroupedItems[key] = [firstElement, lastElementLJEC];
-        } else {
-          mergedGroupedItems[key] = [firstElement, lastElement];
-        }
+      if (groupedItems[ljecKey]) {
+        const jecArray = groupedItems[key];
+        const ljecArray = groupedItems[ljecKey];
+        groupedItems[key] = [jecArray[0], ljecArray[ljecArray.length - 1]];
+        delete groupedItems[ljecKey];
       }
     });
 
-    return Object.entries(mergedGroupedItems).flatMap(([prefix, nums]) => {
+    return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
       let lastterm = "";
       if (
         nums[nums.length - 1] >
@@ -453,7 +453,6 @@ export const test = (
       const consolidatedItems = consolidateItems(allItems);
       const counts = calculateCounts(consolidatedItems, sup);
 
-      // Return only if consolidatedItems is not empty
       if (consolidatedItems.length > 0) {
         return {
           class: classNames[idx],
@@ -462,44 +461,15 @@ export const test = (
           index: idx,
         };
       }
-      return null; // Exclude empty objects
+      return null;
     })
     .filter(Boolean);
-
-  //   function attendanceSheet(singleClass, className) {
-  //     const oddIndexedStudents = [];
-  //     const evenIndexedStudents = [];
-
-  //     // Traverse the input column-wise
-  //     for (let i = 0; i < singleClass[0].length; i++) {
-  //       for (let j = 0; j < singleClass.length; j++) {
-  //         if (i % 2 === 0) {
-  //           evenIndexedStudents.push({ regNo: singleClass[j][i] });
-  //         } else {
-  //           oddIndexedStudents.push({ regNo: singleClass[j][i] });
-  //         }
-  //       }
-  //     }
-
-  //     // Combine odd and even indexed students
-  //     const students = [...evenIndexedStudents, ...oddIndexedStudents];
-
-  //     return {
-  //       class: className,
-  //       students: students,
-  //     };
-  //   }
-
-  //   const attendanceData = classes.map((singleClass, index) => {
-  //     const className = classNames[index]; // Get the class name for the current index
-  //     return attendanceSheet(singleClass, className);
-  //   });
-  //   console.log(attendanceData);
 
   const extractDepartmentYear = (rollNo) => {
     const match = rollNo.match(/L?JEC(\d{2})([A-Z]{2})/);
     return match ? `${match[1]}${match[2]}` : null;
   };
+
   const organizeByDept = (data) => {
     const deptMap = {};
 
@@ -545,6 +515,7 @@ export const test = (
       };
     });
 
+    // Sort the results
     result.sort((a, b) => {
       const yearA = parseInt(a.dept.match(/\d+/)[0]);
       const yearB = parseInt(b.dept.match(/\d+/)[0]);
@@ -561,8 +532,19 @@ export const test = (
       return 0;
     });
 
+    // Add continuous index based on count array length
+    let currentIndex = 0;
+    result.forEach((item) => {
+      item.indexes = [];
+      item.count.forEach(() => {
+        item.indexes.push(currentIndex);
+        currentIndex++;
+      });
+    });
+
     return result;
   };
+
   const deptView = organizeByDept(noticeBoardView);
 
   const classroomViewMaker = (data) => {
@@ -589,16 +571,41 @@ export const test = (
     return updatedData;
   };
 
-  //   classes.forEach((cls, idx) => {
-  //     console.log(`\n${classNames[idx]}\n`);
-  //     cls.forEach((row) => {
-  //       console.log(row);
-  //     });
-  //   });
+  const attendanceSheet = (deptView) => {
+    const sortedClasses = classes.map((classGroup) => {
+      return classGroup.flat().sort();
+    });
+
+    const result = [];
+
+    deptView.forEach((dept) => {
+      dept.rooms.forEach((room) => {
+        let i = 1;
+        const classIndex = classNames.indexOf(room);
+
+        const classGroup = sortedClasses[classIndex]
+          .filter((item) => {
+            if (item === 0) return null;
+            return item.includes(dept.dept);
+          })
+          .map((item) => ({
+            slNo: i++,
+            deptRoom: dept.dept + room,
+            regNo: item,
+          }));
+
+        result.push(classGroup);
+      });
+    });
+
+    return result;
+  };
+
+  const attendanceView = attendanceSheet(deptView);
 
   const classroomView = classes.map((cls) => {
     return classroomViewMaker(cls);
   });
 
-  return [noticeBoardView, deptView, classroomView, classNames];
+  return [noticeBoardView, deptView, classroomView, attendanceView, classNames];
 };

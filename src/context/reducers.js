@@ -3,6 +3,7 @@ import {
   SET_ACADEMIC_YEAR,
   SET_ALLOCATED_DATA,
   SET_ALLOCATION_DETAILS,
+  SET_SINGLE_ATTENDANCE,
   SET_SINGLE_CLASS,
   SET_SLOT_LOADING,
   SET_SLOTS,
@@ -63,6 +64,7 @@ const reducer = (state, action) => {
         noticeBoardView: action.payload.noticeBoardView,
         deptView: action.payload.deptView,
         classroomView: action.payload.classroomView,
+        attendanceView: action.payload.attendanceView,
         classNames: action.payload.classNames,
         isLoading: false,
       };
@@ -71,6 +73,11 @@ const reducer = (state, action) => {
         ...state,
         singleClassView: action.payload.singleClassView,
         singleClassName: action.payload.singleClassName,
+      };
+    case SET_SINGLE_ATTENDANCE:
+      return {
+        ...state,
+        singleAttendanceView: action.payload.singleAttendanceView,
       };
     case SET_ACADEMIC_YEAR:
       return {

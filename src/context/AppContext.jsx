@@ -5,6 +5,7 @@ import {
   SET_ACADEMIC_YEAR,
   SET_ALLOCATED_DATA,
   SET_ALLOCATION_DETAILS,
+  SET_SINGLE_ATTENDANCE,
   SET_SINGLE_CLASS,
   SET_SLOT_LOADING,
   SET_SLOTS,
@@ -51,8 +52,10 @@ const initialState = {
   noticeBoardView: {},
   deptView: {},
   classroomView: [],
+  attendanceView:[],
   classNames: [],
   singleClassView: [],
+  singleAttendanceView: [],
   singleClassName: "",
   selectedSlotName: "",
   dateTime: "",
@@ -218,7 +221,7 @@ const AppProvider = ({ children }) => {
     }
   };
   const fetchBatches = async (academicYear) => {
-     showAlert("loading", "Fetching Batches ...");
+    showAlert("loading", "Fetching Batches ...");
     const years = [
       academicYear.year().toString().slice(-2),
       (academicYear.year() - 1).toString().slice(-2),
@@ -1072,14 +1075,15 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const setAllocatedData = (allocatedData) => {
+  const setAllocatedData = (allocatedData) => {        
     dispatch({
       type: SET_ALLOCATED_DATA,
       payload: {
         noticeBoardView: allocatedData[0],
         deptView: allocatedData[1],
         classroomView: allocatedData[2],
-        classNames: allocatedData[3],
+        attendanceView: allocatedData[3],
+        classNames: allocatedData[4],
       },
     });
   };
@@ -1089,6 +1093,15 @@ const AppProvider = ({ children }) => {
       payload: {
         singleClassView,
         singleClassName: className,
+      },
+    });
+  };
+  const setSingleAttendance = (singleAttendanceView) => {
+    
+    dispatch({
+      type: SET_SINGLE_ATTENDANCE,
+      payload: {
+        singleAttendanceView,
       },
     });
   };
@@ -1117,6 +1130,7 @@ const AppProvider = ({ children }) => {
         setSingleClassView,
         allotExamHall,
         updateBatches,
+        setSingleAttendance
       }}
     >
       {contextHolder}

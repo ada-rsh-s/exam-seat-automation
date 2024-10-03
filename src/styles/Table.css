@@ -33,6 +33,10 @@
   padding: 10px;
 }
 
+.attendancebutton{
+  margin-bottom: 10px;
+}
+
 .printbutton:hover {
   background: var(--Curious-Blue-950, #1f5878) !important;
   color: var(--Curious-Blue-50, rgb(237, 235, 235)) !important;

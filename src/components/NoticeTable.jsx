@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 const NoticeTable = () => {
   const { noticeBoardView, dateTime, classroomView, setSingleClassView,classNames } =
     useAppContext();
-
+    
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();

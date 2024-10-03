@@ -1,4 +1,4 @@
-import { Collapse, ConfigProvider, Select } from "antd"; // Import ConfigProvider
+import { Collapse, ConfigProvider, Select } from "antd"; 
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { test } from "../utils/seatAllocator";
@@ -18,7 +18,8 @@ const TodayExam = () => {
     examToday,
     setAllocatedData,
     selectedSlotName,
-    deptView
+    deptView,
+
   } = useAppContext();
   const [slotNames, setSlotNames] = useState([]);
   const [slotChanged, setSlotChanged] = useState(false);
@@ -42,7 +43,7 @@ const TodayExam = () => {
       rejoin &&
       examToday &&
       selectedSlotName
-    ) {
+  ) {
       if (slotChanged) {
         const allocatedData = test(
           classCapacity,

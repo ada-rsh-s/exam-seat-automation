@@ -6,37 +6,40 @@ import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 
 const DepartmentTable = () => {
-  const { deptView, dateTime } = useAppContext(); // Access deptView from context
-   const navigate = useNavigate(); // Use navigate to change routes
+  const { deptView, attendanceView, dateTime, setSingleAttendance } =
+    useAppContext();
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Update the data whenever deptView changes
   useEffect(() => {
     if (deptView.length > 0) {
-      setData(deptView); // Set the new data without transformation
+      setData(deptView);
     }
   }, [deptView]);
 
   const formatItems = (items) => {
-    // Group the items into pairs and join them with a hyphen and line break
     return items
       .map((item, index) => {
         if (index % 2 === 0 && items[index + 1]) {
-          return `${item} - ${items[index + 1]}`; // Join pairs of adjacent items with a hyphen
+          return `${item} - ${items[index + 1]}`;
         }
-        return null; // Skip odd indexed items as they are already paired
+        return null;
       })
-      .filter(Boolean) // Remove null values
-      .join("<br /><br />"); // Join pairs with a line break
+      .filter(Boolean)
+      .join("<br /><br />");
   };
 
   const formatCounts = (counts) => {
-    // Join count values with a line break
     return counts.join("<br /><br />");
   };
 
-  const filteredResults = filteredData(data, searchTerm); // Filtered data based on searchTerm
+  const handleClick = (index) => {    
+    setSingleAttendance(attendanceView[index]);
+    navigate("/print?destination=attendance");
+  };
+
+  const filteredResults = filteredData(data, searchTerm);
 
   const columns = [
     {
@@ -54,6 +57,7 @@ const DepartmentTable = () => {
         />
       ),
       wrap: true,
+      width: "200px",
     },
     {
       name: "Roll Numbers",
@@ -61,11 +65,31 @@ const DepartmentTable = () => {
         <div dangerouslySetInnerHTML={{ __html: formatItems(row.rollNums) }} />
       ),
       wrap: true,
+      width: "500px",
     },
     {
       name: "Count",
       selector: (row) => (
         <div dangerouslySetInnerHTML={{ __html: formatCounts(row.count) }} />
+      ),
+      wrap: true,
+      width: "100px",
+    },
+    {
+      name: "Attendance",
+      selector: (row) => (
+        <>
+          {row.indexes.map((index, idx) => (
+            <Button
+              key={idx} // Add a unique key for each button
+              className="printbutton attendancebutton"
+              onClick={() => handleClick(index, idx)} // Pass the index of the button
+              type="primary"
+            >
+              Print sheet {index} {/* Use the index as the label */}
+            </Button>
+          ))}
+        </>
       ),
       wrap: true,
     },
@@ -77,7 +101,7 @@ const DepartmentTable = () => {
     filteredResults,
     searchTerm,
     setSearchTerm,
-    dateTime
+    dateTime,
   };
 
   return (

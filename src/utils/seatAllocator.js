@@ -8,8 +8,6 @@ export const test = (
   rejoin,
   examToday
 ) => {
-  console.log("Allocating seats");
-
   let sup = {};
 
   Object.keys(sup).forEach((key) => {
@@ -47,8 +45,7 @@ export const test = (
   let classes = [],
     lastIndex = 0,
     data = [],
-    supIndex = 0,
-    rejoinIndex = 0;
+    supIndex = 0;
 
   const updateDeptStrength = (deptStrength, letStrength) => {
     const updatedDeptStrength = {};
@@ -156,6 +153,7 @@ export const test = (
 
     const deptList = Object.keys(exams);
     const subList = Object.values(exams);
+
     const deptSet = new Set();
 
     examToday.forEach((exam) => {
@@ -210,7 +208,9 @@ export const test = (
       supRollNum = sup[supSub];
     }
     const rejoinDept = Object.keys(rejoin);
-    let rejoinLength = 0;
+    let rejoinLength = 0,
+      rejoinIndex = 0;
+
     let rejoinList;
     let rejoinStr;
     if (rejoinDept.includes(sub)) {
@@ -447,6 +447,7 @@ export const test = (
 
     return counts;
   };
+
   const noticeBoardView = classes
     .map((cls, idx) => {
       const allItems = cls.flat();
@@ -477,13 +478,6 @@ export const test = (
       items.forEach((rollNo) => {
         let deptYear = extractDepartmentYear(rollNo);
         if (!deptYear) return;
-
-        for (const [newDeptYear, rejoinList] of Object.entries(rejoin)) {
-          if (rejoinList.includes(rollNo)) {
-            deptYear = newDeptYear;
-            break;
-          }
-        }
 
         if (!deptMap[deptYear]) {
           deptMap[deptYear] = [];

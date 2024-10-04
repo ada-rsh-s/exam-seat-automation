@@ -86,7 +86,7 @@ const DepartmentTable = () => {
               onClick={() => handleClick(index, idx)} // Pass the index of the button
               type="primary"
             >
-              Print sheet {index} {/* Use the index as the label */}
+              {row.dept} Attendance Sheet {idx+1} {/* Use the index as the label */}
             </Button>
           ))}
         </>

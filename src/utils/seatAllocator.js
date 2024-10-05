@@ -334,7 +334,7 @@ export const test = (
   }
 
   
-  const consolidateItems = (items) => {
+  const consolidateItems = (items) => {     
     const groupedItems = {};
 
     items.forEach((item) => {
@@ -352,6 +352,8 @@ export const test = (
       nums.sort((a, b) => a - b);
       const first = `${prefix}${formatToThreeDigits(nums[0])}`;
       const last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      console.log(prefix,first, last);
+      
       return [first, last];
     });
   };
@@ -418,7 +420,7 @@ export const test = (
   // };
 
   const calculateCounts = (items, sup) => {
-    const counts = [];
+    const counts = [];    
 
     for (let i = 1; i < items.length; i += 2) {
       const num1 = parseInt(items[i].slice(-3));
@@ -525,7 +527,7 @@ export const test = (
 
         deptMap[deptYear].push({ room, rollNo });
       });
-    });
+    });    
 
     const result = Object.keys(deptMap).map((deptYear) => {
       const rooms = [];

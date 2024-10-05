@@ -1,4 +1,4 @@
-import { Collapse, ConfigProvider, Select } from "antd"; 
+import { Collapse, ConfigProvider, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { test } from "../utils/seatAllocator";
@@ -19,7 +19,6 @@ const TodayExam = () => {
     setAllocatedData,
     selectedSlotName,
     deptView,
-
   } = useAppContext();
   const [slotNames, setSlotNames] = useState([]);
   const [slotChanged, setSlotChanged] = useState(false);
@@ -29,7 +28,7 @@ const TodayExam = () => {
       setSlotChanged(false);
     } else {
       setSlotChanged(true);
-      await fetchExamData(slots[slot], slot,selectedSlotName);
+      await fetchExamData(slots[slot], slot, selectedSlotName);
     }
   };
 
@@ -43,19 +42,23 @@ const TodayExam = () => {
       rejoin &&
       examToday &&
       selectedSlotName
-  ) {
+    ) {
       if (slotChanged) {
-        const allocatedData = test(
-          classCapacity,
-          deptStrength,
-          letStrength,
-          exams,
-          drop,
-          rejoin,
-          examToday,
-          selectedSlotName
-        );
-        setAllocatedData(allocatedData);
+        try {
+          const allocatedData = test(
+            classCapacity,
+            deptStrength,
+            letStrength,
+            exams,
+            drop,
+            rejoin,
+            examToday,
+            selectedSlotName
+          );
+          setAllocatedData(allocatedData);
+        } catch (e) {
+          setAllocatedData(undefined);
+        }
       }
     }
   }, [
@@ -86,7 +89,7 @@ const TodayExam = () => {
             {" "}
             {selectedSlotName && <h2>Slot {selectedSlotName}</h2>}
             <div className="tcwrap">
-              {examToday.map((exam, index) => (
+              {examToday && examToday.map((exam, index) => (
                 <div key={index} className="tcard">
                   <img src="../book.svg" alt="hi" />
                   <div className="cdet">

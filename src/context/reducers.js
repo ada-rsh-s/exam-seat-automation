@@ -5,6 +5,7 @@ import {
   SET_ALLOCATION_DETAILS,
   SET_SINGLE_ATTENDANCE,
   SET_SINGLE_CLASS,
+  SET_SLOT_ERROR,
   SET_SLOT_LOADING,
   SET_SLOTS,
   SETUP_USER_BEGIN,
@@ -83,6 +84,10 @@ const reducer = (state, action) => {
       return {
         ...state,
         academicYear: action.payload.academicYear,
+      };
+    case SET_SLOT_ERROR:
+      return {
+        ...initialState,
       };
 
     default:

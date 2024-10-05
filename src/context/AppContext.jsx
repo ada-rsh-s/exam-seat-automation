@@ -7,6 +7,7 @@ import {
   SET_ALLOCATION_DETAILS,
   SET_SINGLE_ATTENDANCE,
   SET_SINGLE_CLASS,
+  SET_SLOT_ERROR,
   SET_SLOT_LOADING,
   SET_SLOTS,
   SETUP_USER_BEGIN,
@@ -1075,17 +1076,24 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const setAllocatedData = (allocatedData) => {        
-    dispatch({
-      type: SET_ALLOCATED_DATA,
-      payload: {
-        noticeBoardView: allocatedData[0],
-        deptView: allocatedData[1],
-        classroomView: allocatedData[2],
-        attendanceView: allocatedData[3],
-        classNames: allocatedData[4],
-      },
-    });
+  const setAllocatedData = (allocatedData) => {  
+    if(allocatedData!=undefined){
+      dispatch({
+        type: SET_ALLOCATED_DATA,
+        payload: {
+          noticeBoardView: allocatedData[0],
+          deptView: allocatedData[1],
+          classroomView: allocatedData[2],
+          attendanceView: allocatedData[3],
+          classNames: allocatedData[4],
+        },
+      });
+    } else {
+      dispatch({
+        type: SET_SLOT_ERROR,
+      });
+      showAlert("warning", " TRY AGAIN!");
+    }
   };
   const setSingleClassView = (singleClassView, className) => {
     dispatch({

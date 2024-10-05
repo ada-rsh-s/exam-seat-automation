@@ -42,7 +42,7 @@ const ClassPrint = () => {
         {singleClassView.map((row, index) => (
           <tr key={index}>
             {row.map((cell, cellIndex) => (
-              <td key={cellIndex}>{cell}</td>
+              <td key={cellIndex}>{cell === 0 ? '-' : cell}</td>
             ))}
           </tr>
         ))}

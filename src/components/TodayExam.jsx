@@ -58,6 +58,9 @@ const TodayExam = () => {
           setAllocatedData(allocatedData);
         } catch (e) {
           setAllocatedData(undefined);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         }
       }
     }
@@ -89,14 +92,15 @@ const TodayExam = () => {
             {" "}
             {selectedSlotName && <h2>Slot {selectedSlotName}</h2>}
             <div className="tcwrap">
-              {examToday && examToday.map((exam, index) => (
-                <div key={index} className="tcard">
-                  <img src="../book.svg" alt="hi" />
-                  <div className="cdet">
-                    <h3>{exam}</h3>
+              {examToday &&
+                examToday.map((exam, index) => (
+                  <div key={index} className="tcard">
+                    <img src="../book.svg" alt="hi" />
+                    <div className="cdet">
+                      <h3>{exam}</h3>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </center>
         </div>

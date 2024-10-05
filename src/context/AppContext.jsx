@@ -7,7 +7,6 @@ import {
   SET_ALLOCATION_DETAILS,
   SET_SINGLE_ATTENDANCE,
   SET_SINGLE_CLASS,
-  SET_SLOT_ERROR,
   SET_SLOT_LOADING,
   SET_SLOTS,
   SETUP_USER_BEGIN,
@@ -53,7 +52,7 @@ const initialState = {
   noticeBoardView: {},
   deptView: {},
   classroomView: [],
-  attendanceView:[],
+  attendanceView: [],
   classNames: [],
   singleClassView: [],
   singleAttendanceView: [],
@@ -1076,8 +1075,8 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const setAllocatedData = (allocatedData) => {  
-    if(allocatedData!=undefined){
+  const setAllocatedData = (allocatedData) => {
+    if (allocatedData != undefined) {
       dispatch({
         type: SET_ALLOCATED_DATA,
         payload: {
@@ -1089,9 +1088,6 @@ const AppProvider = ({ children }) => {
         },
       });
     } else {
-      dispatch({
-        type: SET_SLOT_ERROR,
-      });
       showAlert("warning", " TRY AGAIN!");
     }
   };
@@ -1105,7 +1101,6 @@ const AppProvider = ({ children }) => {
     });
   };
   const setSingleAttendance = (singleAttendanceView) => {
-    
     dispatch({
       type: SET_SINGLE_ATTENDANCE,
       payload: {
@@ -1138,7 +1133,7 @@ const AppProvider = ({ children }) => {
         setSingleClassView,
         allotExamHall,
         updateBatches,
-        setSingleAttendance
+        setSingleAttendance,
       }}
     >
       {contextHolder}

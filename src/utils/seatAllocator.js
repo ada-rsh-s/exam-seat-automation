@@ -333,8 +333,7 @@ export const test = (
     subjectAllotedNum++;
   }
 
-  
-  const consolidateItems = (items) => {     
+  const consolidateItems = (items) => {
     const groupedItems = {};
 
     items.forEach((item) => {
@@ -352,15 +351,14 @@ export const test = (
       nums.sort((a, b) => a - b);
       const first = `${prefix}${formatToThreeDigits(nums[0])}`;
       const last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-      console.log(prefix,first, last);
-      
+
       return [first, last];
     });
   };
 
   // const consolidateItems = (items) => {
   //   const groupedItems = {};
-    
+
   //   items.forEach((item) => {
   //     if (item != 0) {
   //       const [prefix, num] = item
@@ -378,7 +376,6 @@ export const test = (
   //     const deptB = b.match(/\d+/)[0];
   //     return deptA.localeCompare(deptB);
   //   });
-    
 
   //   sortedKeys.forEach((key) => {
   //     let ljecKey;
@@ -387,7 +384,6 @@ export const test = (
   //     else ljecKey = `L${key}`;
 
   //     console.log(ljecKey);
-      
 
   //     if (groupedItems[ljecKey]) {
   //       const jecArray = groupedItems[key];
@@ -420,7 +416,7 @@ export const test = (
   // };
 
   const calculateCounts = (items, sup) => {
-    const counts = [];    
+    const counts = [];
 
     for (let i = 1; i < items.length; i += 2) {
       const num1 = parseInt(items[i].slice(-3));
@@ -527,7 +523,7 @@ export const test = (
 
         deptMap[deptYear].push({ room, rollNo });
       });
-    });    
+    });
 
     const result = Object.keys(deptMap).map((deptYear) => {
       const rooms = [];
@@ -539,7 +535,7 @@ export const test = (
 
         rooms.push(room1);
         rollNums.push(rollNo1, rollNo2);
-      }      
+      }
 
       const counts = calculateCounts(rollNums, sup);
 
@@ -619,22 +615,22 @@ export const test = (
         let i = 1;
         const classIndex = classNames.indexOf(room);
 
-       const classGroup = sortedClasses[classIndex]
-         .filter((item) => {
-           if (item === 0) return null;
-           return item.includes(dept.dept);
-         })
-         .concat(
-           sortedClasses[classIndex].filter((item) => {
-             if (item === 0) return null;
-             return rejoin[dept.dept] && rejoin[dept.dept].includes(item);
-           })
-         )
-         .map((item) => ({
-           slNo: i++,
-           deptRoom: dept.dept + room,
-           regNo: item,
-         }));
+        const classGroup = sortedClasses[classIndex]
+          .filter((item) => {
+            if (item === 0) return null;
+            return item.includes(dept.dept);
+          })
+          .concat(
+            sortedClasses[classIndex].filter((item) => {
+              if (item === 0) return null;
+              return rejoin[dept.dept] && rejoin[dept.dept].includes(item);
+            })
+          )
+          .map((item) => ({
+            slNo: i++,
+            deptRoom: dept.dept + room,
+            regNo: item,
+          }));
 
         result.push(classGroup);
       });

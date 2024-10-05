@@ -333,6 +333,7 @@ export const test = (
     subjectAllotedNum++;
   }
 
+  
   const consolidateItems = (items) => {
     const groupedItems = {};
 
@@ -344,46 +345,77 @@ export const test = (
 
         if (!groupedItems[prefix]) groupedItems[prefix] = [];
         groupedItems[prefix].push(Number(num));
-        groupedItems[prefix].sort((a, b) => a - b);
-      }
-    });
-
-    const sortedKeys = Object.keys(groupedItems).sort((a, b) => {
-      const deptA = a.match(/\d+/)[0];
-      const deptB = b.match(/\d+/)[0];
-      return deptA.localeCompare(deptB);
-    });
-
-    sortedKeys.forEach((key) => {
-      let ljecKey;
-
-      if (key.startsWith("L")) ljecKey = `${key}`;
-      else ljecKey = `L${key}`;
-
-      if (groupedItems[ljecKey]) {
-        const jecArray = groupedItems[key];
-        const ljecArray = groupedItems[ljecKey];
-        groupedItems[key] = [jecArray[0], ljecArray[ljecArray.length - 1]];
-        delete groupedItems[ljecKey];
       }
     });
 
     return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
-      let lastterm = "";
-      if (
-        nums[nums.length - 1] >
-        deptStrength[prefix.slice(-4)] - letStrength[prefix.slice(-4)]
-      ) {
-        lastterm = `L${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-      } else {
-        lastterm = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-      }
+      nums.sort((a, b) => a - b);
       const first = `${prefix}${formatToThreeDigits(nums[0])}`;
-      const last = lastterm;
-
+      const last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
       return [first, last];
     });
   };
+
+  // const consolidateItems = (items) => {
+  //   const groupedItems = {};
+    
+  //   items.forEach((item) => {
+  //     if (item != 0) {
+  //       const [prefix, num] = item
+  //         .match(/^([A-Z]{3,4}\d{2}[A-Z]{2})(\d{3})$/)
+  //         .slice(1);
+
+  //       if (!groupedItems[prefix]) groupedItems[prefix] = [];
+  //       groupedItems[prefix].push(Number(num));
+  //       groupedItems[prefix].sort((a, b) => a - b);
+  //     }
+  //   });
+
+  //   const sortedKeys = Object.keys(groupedItems).sort((a, b) => {
+  //     const deptA = a.match(/\d+/)[0];
+  //     const deptB = b.match(/\d+/)[0];
+  //     return deptA.localeCompare(deptB);
+  //   });
+    
+
+  //   sortedKeys.forEach((key) => {
+  //     let ljecKey;
+
+  //     if (key.startsWith("L")) ljecKey = `${key}`;
+  //     else ljecKey = `L${key}`;
+
+  //     console.log(ljecKey);
+      
+
+  //     if (groupedItems[ljecKey]) {
+  //       const jecArray = groupedItems[key];
+  //       const ljecArray = groupedItems[ljecKey];
+  //       groupedItems[key] = [jecArray[0], ljecArray[ljecArray.length - 1]];
+  //       delete groupedItems[ljecKey];
+  //     }
+  //   });
+
+  //   return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
+  //     let lastterm = "";
+  //     if (
+  //       nums[nums.length - 1] >
+  //       deptStrength[prefix.slice(-4)] - letStrength[prefix.slice(-4)]
+  //     ) {
+  //       lastterm = `L${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+  //     } else {
+  //       lastterm = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+  //     }
+  //     let first = `${prefix}${formatToThreeDigits(nums[0])}`;
+  //     let last = lastterm;
+
+  //     const rejoinValues = Object.values(rejoin).flat();
+  //     if (rejoinValues.includes(`L${last}`)) {
+  //       last = `L${last}`;
+  //     }
+
+  //     return [first, last];
+  //   });
+  // };
 
   const calculateCounts = (items, sup) => {
     const counts = [];
@@ -479,6 +511,14 @@ export const test = (
         let deptYear = extractDepartmentYear(rollNo);
         if (!deptYear) return;
 
+        // Check if rollNo is in any keys of rejoin object
+        let rejoinKey = Object.keys(rejoin).find((key) =>
+          rejoin[key].includes(rollNo)
+        );
+        if (rejoinKey) {
+          deptYear = rejoinKey;
+        }
+
         if (!deptMap[deptYear]) {
           deptMap[deptYear] = [];
         }
@@ -497,7 +537,7 @@ export const test = (
 
         rooms.push(room1);
         rollNums.push(rollNo1, rollNo2);
-      }
+      }      
 
       const counts = calculateCounts(rollNums, sup);
 
@@ -577,16 +617,22 @@ export const test = (
         let i = 1;
         const classIndex = classNames.indexOf(room);
 
-        const classGroup = sortedClasses[classIndex]
-          .filter((item) => {
-            if (item === 0) return null;
-            return item.includes(dept.dept);
-          })
-          .map((item) => ({
-            slNo: i++,
-            deptRoom: dept.dept + room,
-            regNo: item,
-          }));
+       const classGroup = sortedClasses[classIndex]
+         .filter((item) => {
+           if (item === 0) return null;
+           return item.includes(dept.dept);
+         })
+         .concat(
+           sortedClasses[classIndex].filter((item) => {
+             if (item === 0) return null;
+             return rejoin[dept.dept] && rejoin[dept.dept].includes(item);
+           })
+         )
+         .map((item) => ({
+           slNo: i++,
+           deptRoom: dept.dept + room,
+           regNo: item,
+         }));
 
         result.push(classGroup);
       });

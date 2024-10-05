@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import "../styles/Printdept.css";
 
 const PrintAttendance = () => {
   const { singleAttendanceView, dateTime } = useAppContext();
-  console.log(singleAttendanceView);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.print();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -12,8 +18,8 @@ const PrintAttendance = () => {
         <thead>
           {/* College Information Row */}
           <tr>
-            <th colSpan="3" style={{ textAlign: "center", padding: "10px" }}>
-              <h2>JYOTHI ENGINEERING COLLEGE, CHERUTHURUTHY</h2>
+            <th colSpan="3" style={{ textAlign: "center"}}>
+              <strong>JYOTHI ENGINEERING COLLEGE, CHERUTHURUTHY</strong>
             </th>
           </tr>
           <tr>
@@ -21,7 +27,10 @@ const PrintAttendance = () => {
               <strong>
                 Class : {singleAttendanceView[0].deptRoom.substring(0, 4)}
               </strong>{" "}
-              | <strong>Room : {singleAttendanceView[0].deptRoom.slice(4)}</strong>
+              |{" "}
+              <strong>
+                Room : {singleAttendanceView[0].deptRoom.slice(4)}
+              </strong>
             </th>
           </tr>
 

@@ -10,6 +10,10 @@ export const test = (
 ) => {
   let sup = {};
 
+  for (let key of Object.keys(exams)) {
+    exams[key] = exams[key].filter((exam) => examToday.includes(exam));
+  }
+
   Object.keys(sup).forEach((key) => {
     exams[`SUP_${key}`] = [key];
   });
@@ -19,6 +23,8 @@ export const test = (
   });
 
   function mergeExamSchedules(exams) {
+    console.log(exams);
+    
     let updatedExams = {};
     for (let key in exams) {
       let mergedExams = new Set(exams[key]);

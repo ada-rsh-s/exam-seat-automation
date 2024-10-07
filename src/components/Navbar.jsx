@@ -28,7 +28,7 @@ const Navbar = () => {
     >
       <div className="navbar">
         <img className="brandLogo" srcSet="../Logo.png" alt="" />
-        <h2 className="appName">Exam Seat Automation</h2>
+        <h2 className="appName">AsientoMatic</h2>
         <Dropdown
           menu={{
             items,

@@ -592,21 +592,21 @@ const AppProvider = ({ children }) => {
       let classroomSet = new Set(); // For detecting duplicates
 
       // Function to find optimal rows and columns array based on the number of desks
-      const findRowsAndColumns = (desks) => {
-        let rows = Math.floor(Math.sqrt(desks)); // Start with square root for balanced layout
-        let columns = Math.ceil(desks / rows);
+      // const findRowsAndColumns = (desks) => {
+      //   let rows = Math.floor(Math.sqrt(desks)); // Start with square root for balanced layout
+      //   let columns = Math.ceil(desks / rows);
 
-        while (rows * columns > desks) {
-          rows--;
-          columns = Math.ceil(desks / rows);
-        }
+      //   while (rows * columns > desks) {
+      //     rows--;
+      //     columns = Math.ceil(desks / rows);
+      //   }
 
-        if (rows < columns) {
-          [rows, columns] = [columns, rows]; // Swap rows and columns
-        }
+      //   if (rows < columns) {
+      //     [rows, columns] = [columns, rows]; // Swap rows and columns
+      //   }
 
-        return [rows, columns];
-      };
+      //   return [rows, columns];
+      // };
 
       for (const sheetName of validSheetNames) {
         if (!cancelToken.current) break; // Check for cancellation
@@ -646,8 +646,11 @@ const AppProvider = ({ children }) => {
           classroomSet.add(classroom);
 
           if (classroom && desks) {
-            const [rows, columns] = findRowsAndColumns(desks * 2);
-            classesData[classroom] = [rows, columns];
+            // const [rows, columns] = findRowsAndColumns(desks * 2);
+            // classesData[classroom] = [rows, columns];//[desks,2]
+            if (classroom == "WAB 412") classesData[classroom] = [10, 5];
+            else if (classroom == "EAB 310") classesData[classroom] = [10, 3];
+            else classesData[classroom] = [desks, 2];
 
             processedItems++;
             const percent = Math.round((processedItems / totalItems) * 100);

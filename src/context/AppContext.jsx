@@ -648,9 +648,30 @@ const AppProvider = ({ children }) => {
           if (classroom && desks) {
             // const [rows, columns] = findRowsAndColumns(desks * 2);
             // classesData[classroom] = [rows, columns];//[desks,2]
-            if (classroom == "WAB 412") classesData[classroom] = [10, 5];
-            else if (classroom == "EAB 310") classesData[classroom] = [10, 3];
-            else classesData[classroom] = [desks, 2];
+            if (classroom === "WAB 412" || classroom === "EAB 310") {
+              // Start with the minimum of 2 columns (and it must be odd, so we start with 3)
+              let columns = 3;
+
+              // Find the maximum columns such that rows > columns
+              while (columns < desks) {
+                const rows = Math.floor(desks / columns);
+
+                // Ensure rows > columns
+                if (rows > columns) {
+                  columns += 2; // Increment to the next odd number
+                } else {
+                  break; // Stop when rows are not greater than columns
+                }
+              }
+
+              // Go back to the last valid odd column
+              columns -= 2;
+
+              // Calculate the final rows with the valid number of columns
+              classesData[classroom] = [Math.floor(desks / columns), columns];
+            } else {
+              classesData[classroom] = [desks, 2]; // Default case
+            }
 
             processedItems++;
             const percent = Math.round((processedItems / totalItems) * 100);
@@ -658,6 +679,7 @@ const AppProvider = ({ children }) => {
           }
         });
       }
+      console.log(classesData);
 
       // Upload the accumulated classes data to Firebase
       const classesDocRef = doc(db, "Classes", "AvailableClasses");

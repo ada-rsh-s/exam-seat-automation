@@ -18,6 +18,7 @@ import { signInWithEmailAndPassword } from "@firebase/auth";
 import { createUserWithEmailAndPassword } from "@firebase/auth";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -552,6 +553,7 @@ const AppProvider = ({ children }) => {
   };
 
   const uploadExamhallFile = async (workbook, updateProgress, cancelToken) => {
+    
     try {
       const expectedHeaders = [
         "Semester",
@@ -684,6 +686,10 @@ const AppProvider = ({ children }) => {
       // Upload the accumulated classes data to Firebase
       const classesDocRef = doc(db, "Classes", "AvailableClasses");
       const allottedclassesDocRef = doc(db, "Classes", "AllotedClasses");
+
+      // Delete existing documents
+      await deleteDoc(classesDocRef);
+      await deleteDoc(allottedclassesDocRef);
 
       await setDoc(classesDocRef, classesData, { merge: true });
       await setDoc(allottedclassesDocRef, classesData, { merge: true });

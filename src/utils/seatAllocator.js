@@ -6,7 +6,9 @@ export const test = (
   exams,
   drop,
   rejoin,
-  examToday
+  examToday,
+  savedClasses,
+  savedData
 ) => {
   let sup = {};
 
@@ -23,8 +25,6 @@ export const test = (
   });
 
   function mergeExamSchedules(exams) {
-    console.log(exams);
-    
     let updatedExams = {};
     for (let key in exams) {
       let mergedExams = new Set(exams[key]);
@@ -65,7 +65,15 @@ export const test = (
 
   deptStrength = updateDeptStrength(deptStrength, letStrength);
 
-  const classNames = Object.keys(classCapacity);
+  
+  classCapacity = Object.entries(classCapacity)
+    .sort(([, a], [, b]) => b[0] * b[1] - a[0] * a[1]) 
+    .reduce((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+  let classNames = Object.keys(classCapacity);
+  console.log(classNames);
 
   for (let i = 0; i < classNames.length; i++) {
     const [rows, cols] = classCapacity[classNames[i]];
@@ -73,6 +81,7 @@ export const test = (
       .fill()
       .map(() => Array(cols).fill(0));
   }
+  console.log(classNames);
 
   //to calculate strength of odd/even indices
   function strengthCalculator(n, data) {
@@ -189,7 +198,10 @@ export const test = (
     optimizer(arraySorter(resultArray), 1);
     return data;
   }
-  data = dataArrayMaker(examToday, exams, deptStrength);
+
+  if (savedData.length === 0)
+    data = dataArrayMaker(examToday, exams, deptStrength);
+  else data = savedData;
 
   let evenBenchIndex = 0;
   let oddBenchIndex = 1;
@@ -328,15 +340,19 @@ export const test = (
     }
   };
 
-  let subjectAllotedNum = 0;
-  for (const [dept, num] of data) {
-    dept, num;
-    if (subjectAllotedNum % 2 === 0) {
-      seatArr(num, dept, 0);
-    } else {
-      seatArr(num, dept, 1);
+  if (savedClasses.length === 0) {
+    let subjectAllotedNum = 0;
+    for (const [dept, num] of data) {
+      dept, num;
+      if (subjectAllotedNum % 2 === 0) {
+        seatArr(num, dept, 0);
+      } else {
+        seatArr(num, dept, 1);
+      }
+      subjectAllotedNum++;
     }
-    subjectAllotedNum++;
+  } else {
+    classes = savedClasses;
   }
 
   const consolidateItems = (items) => {
@@ -651,5 +667,13 @@ export const test = (
     return classroomViewMaker(cls);
   });
 
-  return [noticeBoardView, deptView, classroomView, attendanceView, classNames];
+  return [
+    noticeBoardView,
+    deptView,
+    classroomView,
+    attendanceView,
+    classNames,
+    classes,
+    data,
+  ];
 };

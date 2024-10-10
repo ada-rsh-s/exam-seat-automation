@@ -19,6 +19,7 @@ import { createUserWithEmailAndPassword } from "@firebase/auth";
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -138,7 +139,6 @@ const AppProvider = ({ children }) => {
   };
 
   // const batchesForm = async (depts) => {
-  //   console.log(depts);
 
   //   showAlert("loading", "Updating Batch Details ...");
   //   const SubdocRef = doc(firestore, "DeptDetails", "Exams");
@@ -161,7 +161,6 @@ const AppProvider = ({ children }) => {
   //   const LetFields = getDeptFields("let");
   //   const dropFields = getDeptFields("drop");
   //   const rejoinFields = getDeptFields("rejoin");
-  //   console.log(RegFields);
 
   //   try {
   //     await setDoc(SubdocRef, SubFields, { merge: true });
@@ -553,7 +552,6 @@ const AppProvider = ({ children }) => {
   };
 
   const uploadExamhallFile = async (workbook, updateProgress, cancelToken) => {
-    
     try {
       const expectedHeaders = [
         "Semester",
@@ -681,7 +679,6 @@ const AppProvider = ({ children }) => {
           }
         });
       }
-      console.log(classesData);
 
       // Upload the accumulated classes data to Firebase
       const classesDocRef = doc(db, "Classes", "AvailableClasses");
@@ -1011,7 +1008,34 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const fetchExamData = async (examToday, selectedSlotName, prevslot) => {
+  const seatingExists = async (slot) => {
+    try {
+      const docRef = doc(db, "AllExams", "SavedSlots");
+      const dataDocRef = doc(db, "AllExams", "SavedData");
+      const docSnap = await getDoc(docRef);
+      const dataDocSnap = await getDoc(dataDocRef);
+
+      if (docSnap.exists() && dataDocSnap.exists()) {
+        const savedSlots = docSnap.data();
+        const savedData = dataDocSnap.data();
+
+        if (savedSlots.hasOwnProperty(slot) && savedData.hasOwnProperty(slot)) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchExamData = async (
+    examToday,
+    selectedSlotName,
+    prevslot,
+    slotExists
+  ) => {
     dispatch({
       type: SET_SLOT_LOADING,
       payload: {
@@ -1088,6 +1112,24 @@ const AppProvider = ({ children }) => {
             dateTime,
           },
         });
+
+        if (slotExists) {
+          showAlert("loading", `Fetching saved seating for ${selectedSlotName}`);
+          const docSnap = await getDoc(doc(db, "AllExams", "SavedSlots"));
+          const dataDocSnap = await getDoc(doc(db, "AllExams", "SavedData"));
+
+          if (docSnap.exists && dataDocSnap.exists) {
+            const stringifiedData = [
+              docSnap.data()[selectedSlotName],
+              dataDocSnap.data()[selectedSlotName],
+            ];
+
+            const savedClasses = JSON.parse(stringifiedData[0]);
+            const savedData = JSON.parse(stringifiedData[1]);
+
+            return { savedData, savedClasses };
+          }
+        }
       } else {
         dispatch({
           type: SET_SLOT_LOADING,
@@ -1106,8 +1148,50 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const setAllocatedData = (allocatedData) => {
+  const deleteAllocatedSlot = async (slot) => {
+    showAlert("warning", `Deleting Seating for Slot ${slot} ...`);
+
+    const docRef = doc(db, "AllExams", "SavedSlots");
+    const dataDocRef = doc(db, "AllExams", "SavedData");
+
+    try {
+      await updateDoc(docRef, {
+        [slot]: deleteField(),
+      });
+      await updateDoc(dataDocRef, {
+        [slot]: deleteField(),
+      });
+    } catch (error) {
+      console.error("Error deleting slot: ", error);
+    }
+  };
+
+  const setAllocatedData = async (allocatedData, selectedSlotName) => {
     if (allocatedData != undefined) {
+      const stringifiedData = [
+        JSON.stringify(allocatedData[5]),
+        JSON.stringify(allocatedData[6]),
+      ];
+
+      try {
+        await setDoc(
+          doc(db, "AllExams", "SavedSlots"),
+          {
+            [selectedSlotName]: stringifiedData[0],
+          },
+          { merge: true }
+        );
+
+        await setDoc(
+          doc(db, "AllExams", "SavedData"),
+          {
+            [selectedSlotName]: stringifiedData[1],
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.error("Error saving array: ", error);
+      }
       dispatch({
         type: SET_ALLOCATED_DATA,
         payload: {
@@ -1165,6 +1249,8 @@ const AppProvider = ({ children }) => {
         allotExamHall,
         updateBatches,
         setSingleAttendance,
+        seatingExists,
+        deleteAllocatedSlot,
       }}
     >
       {contextHolder}

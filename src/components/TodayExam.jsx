@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { test } from "../utils/seatAllocator";
 import { CaretRightOutlined } from "@ant-design/icons";
+import { Button } from "antd/es";
+import confirm from "antd/es/modal/confirm";
+import { ExclamationCircleFilled } from "@ant-design/icons/lib";
+import { Popconfirm } from "antd";
 
 const TodayExam = () => {
   const {
@@ -19,17 +23,47 @@ const TodayExam = () => {
     setAllocatedData,
     selectedSlotName,
     deptView,
+    seatingExists,
+    deleteAllocatedSlot,
   } = useAppContext();
   const [slotNames, setSlotNames] = useState([]);
+  const [savedClasses, setSavedClasses] = useState(null);
+  const [savedData, setSavedData] = useState(null);
   const [slotChanged, setSlotChanged] = useState(false);
 
-  const submitSlot = async (slot) => {
+  const checkSlot = async (slot) => {
+    const seatExists = await seatingExists(slot);
+    if (seatExists) showConfirm(slot);
+    else submitSlot(slot, false);
+  };
+
+  const submitSlot = async (slot, slotExists) => {
     if (selectedSlotName === slot) {
       setSlotChanged(false);
     } else {
       setSlotChanged(true);
-      await fetchExamData(slots[slot], slot, selectedSlotName);
+      const data = await fetchExamData(
+        slots[slot],
+        slot,
+        selectedSlotName,
+        slotExists
+      );
+
+      if (data !== undefined) {
+        setSavedClasses(data.savedClasses);
+        setSavedData(data.savedData);
+      } else {
+        setSavedClasses([]);
+        setSavedData([]);
+      }
     }
+  };
+
+  const deleteSlot = async () => {
+    await deleteAllocatedSlot(selectedSlotName);
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   useEffect(() => {
@@ -43,7 +77,9 @@ const TodayExam = () => {
       examToday &&
       selectedSlotName
     ) {
-      if (slotChanged) {
+      console.log(savedClasses);
+
+      if (slotChanged && savedClasses !== null && savedData !== null) {
         try {
           const allocatedData = test(
             classCapacity,
@@ -53,9 +89,12 @@ const TodayExam = () => {
             drop,
             rejoin,
             examToday,
-            selectedSlotName
+            savedClasses,
+            savedData
           );
-          setAllocatedData(allocatedData);
+          setSavedClasses(null);
+          setSavedData(null);
+          setAllocatedData(allocatedData, selectedSlotName);
         } catch (e) {
           setAllocatedData(undefined);
           setTimeout(() => {
@@ -73,7 +112,26 @@ const TodayExam = () => {
     rejoin,
     examToday,
     selectedSlotName,
+    savedClasses,
+    savedData,
   ]);
+
+  const showConfirm = (slot) => {
+    confirm({
+      title: "Seating exists! Create a new one?",
+      icon: <ExclamationCircleFilled />,
+      okText: "Yes, create new..",
+      cancelText: "Use existing..",
+      okCancel: true,
+      okType: "danger",
+      onOk() {
+        submitSlot(slot, false);
+      },
+      onCancel() {
+        submitSlot(slot, true);
+      },
+    });
+  };
 
   useEffect(() => {
     fetchslotNames().then((fetchedSlotNames) => {
@@ -128,7 +186,7 @@ const TodayExam = () => {
               borderColor: "#f0f9ff",
             }}
             placeholder="Select Slot"
-            onChange={submitSlot}
+            onChange={checkSlot}
             options={slotNames.map((slot) => ({
               value: slot,
               label: slot,
@@ -137,6 +195,19 @@ const TodayExam = () => {
               backgroundColor: "#f0f9ff",
             }}
           />
+          &nbsp;&nbsp;
+          {selectedSlotName && (
+            <Popconfirm
+              title="Are you sure you want to delete this?"
+              onConfirm={deleteSlot}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button color="danger" variant="dashed">
+                Delete
+              </Button>
+            </Popconfirm>
+          )}
         </center>
         {Object.keys(deptView).length !== 0 && (
           <>

@@ -65,13 +65,22 @@ export const test = (
 
   deptStrength = updateDeptStrength(deptStrength, letStrength);
 
-  
   classCapacity = Object.entries(classCapacity)
-    .sort(([, a], [, b]) => b[0] * b[1] - a[0] * a[1]) 
+    .sort(([keyA, a], [keyB, b]) => {
+      const strengthA = a[0] * a[1]; // Calculate strength for entry A
+      const strengthB = b[0] * b[1]; // Calculate strength for entry B
+
+      if (strengthA === strengthB) {
+        return keyA.localeCompare(keyB); // If strengths are equal, sort by key
+      }
+
+      return strengthB - strengthA; // Sort by strength (descending)
+    })
     .reduce((acc, [key, value]) => {
       acc[key] = value;
       return acc;
     }, {});
+  
   let classNames = Object.keys(classCapacity);
   console.log(classNames);
 
@@ -81,7 +90,6 @@ export const test = (
       .fill()
       .map(() => Array(cols).fill(0));
   }
-  console.log(classNames);
 
   //to calculate strength of odd/even indices
   function strengthCalculator(n, data) {

@@ -29,7 +29,6 @@ const BatchesTable = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Working");
     if(academicYear){
       fetchBatches(academicYear).then((data) => {
         setData(data);

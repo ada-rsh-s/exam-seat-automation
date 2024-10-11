@@ -77,8 +77,6 @@ const TodayExam = () => {
       examToday &&
       selectedSlotName
     ) {
-      console.log(savedClasses);
-
       if (slotChanged && savedClasses !== null && savedData !== null) {
         try {
           const allocatedData = test(

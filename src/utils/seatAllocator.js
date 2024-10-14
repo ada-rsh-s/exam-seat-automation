@@ -9,7 +9,7 @@ export const test = (
   examToday,
   savedClasses,
   savedData
-) => {
+) => {  
   let sup = {};
 
   for (let key of Object.keys(exams)) {
@@ -23,6 +23,8 @@ export const test = (
   Object.keys(sup).forEach((key) => {
     deptStrength[`SUP_${key}`] = sup[key].length;
   });
+
+  
 
   function mergeExamSchedules(exams) {
     let updatedExams = {};
@@ -47,6 +49,7 @@ export const test = (
   }
 
   exams = mergeExamSchedules(exams, sup);
+  console.log(exams);
 
   let classes = [],
     lastIndex = 0,
@@ -82,7 +85,6 @@ export const test = (
     }, {});
   
   let classNames = Object.keys(classCapacity);
-  console.log(classNames);
 
   for (let i = 0; i < classNames.length; i++) {
     const [rows, cols] = classCapacity[classNames[i]];
@@ -211,6 +213,8 @@ export const test = (
     data = dataArrayMaker(examToday, exams, deptStrength);
   else data = savedData;
 
+  console.log(data);
+  
   let evenBenchIndex = 0;
   let oddBenchIndex = 1;
   let evenRowIndex = 0;

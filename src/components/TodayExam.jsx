@@ -90,6 +90,7 @@ const TodayExam = () => {
             savedClasses,
             savedData
           );
+          
           setSavedClasses(null);
           setSavedData(null);
           setAllocatedData(allocatedData, selectedSlotName);

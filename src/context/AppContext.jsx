@@ -497,6 +497,8 @@ const AppProvider = ({ children }) => {
                 ? String(row[index]).trim()
                 : row[index];
           });
+          item["COURSE CODE"] = item["COURSE CODE"].replace(/\s+/g, "");
+
           // Extract course code and slot information for slot upload
           let slot = item["SLOT"];
           const courseCode = item["COURSE CODE"];
@@ -1114,7 +1116,10 @@ const AppProvider = ({ children }) => {
         });
 
         if (slotExists) {
-          showAlert("loading", `Fetching saved seating for ${selectedSlotName}`);
+          showAlert(
+            "loading",
+            `Fetching saved seating for ${selectedSlotName}`
+          );
           const docSnap = await getDoc(doc(db, "AllExams", "SavedSlots"));
           const dataDocSnap = await getDoc(doc(db, "AllExams", "SavedData"));
 

@@ -49,7 +49,6 @@ export const test = (
   }
 
   exams = mergeExamSchedules(exams, sup);
-  console.log(exams);
 
   let classes = [],
     lastIndex = 0,
@@ -213,7 +212,6 @@ export const test = (
     data = dataArrayMaker(examToday, exams, deptStrength);
   else data = savedData;
 
-  console.log(data);
   
   let evenBenchIndex = 0;
   let oddBenchIndex = 1;

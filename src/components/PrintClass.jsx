@@ -1,9 +1,16 @@
 import React, { useEffect } from "react";
+import queryString from "query-string";
 import { useAppContext } from "../context/AppContext";
 import "../styles/Print.css";
+import { useLocation } from "react-router-dom";
 
 const ClassPrint = () => {
-  const { singleClassView, singleClassName, dateTime } = useAppContext();
+  const location = useLocation();
+  const parsedQuery = queryString.parse(location.search);
+
+  const singleClassView = JSON.parse(parsedQuery.singleClassView); // Parse back to 2D array
+  const singleClassName = parsedQuery.singleClassName;
+  const dateTime = parsedQuery.dateTime;
 
   if (!singleClassView || singleClassView.length === 0) {
     return <p>No data available to display</p>;
@@ -42,7 +49,7 @@ const ClassPrint = () => {
         {singleClassView.map((row, index) => (
           <tr key={index}>
             {row.map((cell, cellIndex) => (
-              <td key={cellIndex}>{cell === 0 ? '-' : cell}</td>
+              <td key={cellIndex}>{cell === 0 ? "-" : cell}</td>
             ))}
           </tr>
         ))}

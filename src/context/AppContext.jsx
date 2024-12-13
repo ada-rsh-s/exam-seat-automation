@@ -593,23 +593,6 @@ const AppProvider = ({ children }) => {
       let classesData = {}; // To accumulate classroom data
       let classroomSet = new Set(); // For detecting duplicates
 
-      // Function to find optimal rows and columns array based on the number of desks
-      // const findRowsAndColumns = (desks) => {
-      //   let rows = Math.floor(Math.sqrt(desks)); // Start with square root for balanced layout
-      //   let columns = Math.ceil(desks / rows);
-
-      //   while (rows * columns > desks) {
-      //     rows--;
-      //     columns = Math.ceil(desks / rows);
-      //   }
-
-      //   if (rows < columns) {
-      //     [rows, columns] = [columns, rows]; // Swap rows and columns
-      //   }
-
-      //   return [rows, columns];
-      // };
-
       for (const sheetName of validSheetNames) {
         if (!cancelToken.current) break; // Check for cancellation
 
@@ -632,7 +615,7 @@ const AppProvider = ({ children }) => {
           });
 
         sortedData.forEach((row) => {
-          if (!cancelToken.current) return; // Check for cancellation
+          if (!cancelToken.current) return; 
 
           const item = {};
           headers.forEach((header, index) => {
@@ -648,10 +631,7 @@ const AppProvider = ({ children }) => {
           classroomSet.add(classroom);
 
           if (classroom && desks) {
-            // const [rows, columns] = findRowsAndColumns(desks * 2);
-            // classesData[classroom] = [rows, columns];//[desks,2]
             if (classroom === "WAB 412" || classroom === "EAB 310") {
-              // Start with the minimum of 2 columns (and it must be odd, so we start with 3)
               let columns = 3;
 
               // Find the maximum columns such that rows > columns
@@ -1089,6 +1069,23 @@ const AppProvider = ({ children }) => {
             // Return the formatted time range
             return `${startTime} - ${endTime}`;
           }, "");
+        
+        // let a = "24-10-2024";
+        // let b = "02-12-2024";
+
+        // let startDate = new Date(a.split("-").reverse().join("-"));
+        // let endDate = new Date(b.split("-").reverse().join("-"));
+
+        // let dateArray = [];
+
+        // while (startDate <= endDate) {
+        //   dateArray.push(
+        //     startDate.toLocaleDateString("en-GB").split("/").join("-")
+        //   );
+        //   startDate.setDate(startDate.getDate() + 1);
+        // }
+
+        // console.log(dateArray);
         if (dateTime === "") {
           dispatch({
             type: SET_SLOT_LOADING,

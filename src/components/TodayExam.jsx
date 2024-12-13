@@ -119,15 +119,29 @@ const TodayExam = () => {
     confirm({
       title: "Seating exists! Create a new one?",
       icon: <ExclamationCircleFilled />,
-      okText: "Yes, create new..",
-      cancelText: "Use existing..",
+      okText: "Use Existing",
+      cancelText: "Yes, create new",
       okCancel: true,
-      okType: "danger",
+      autoFocusButton:null,
+      okButtonProps: {
+        style: {
+          backgroundColor: "#ffff",
+          borderColor: "red",
+          color: "red",
+        }, // Customize the button
+      },
+      cancelButtonProps: {
+        style: {
+          backgroundColor: "#55c2da",
+          borderColor: "#55c2da",
+          color: "white",
+        },
+      },
       onOk() {
-        submitSlot(slot, false);
+        submitSlot(slot, true);
       },
       onCancel() {
-        submitSlot(slot, true);
+        submitSlot(slot, false);
       },
     });
   };

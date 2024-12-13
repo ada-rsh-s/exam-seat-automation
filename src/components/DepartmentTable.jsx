@@ -4,6 +4,7 @@ import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
+import queryString from "query-string";
 
 const DepartmentTable = () => {
   const { deptView, attendanceView, dateTime, setSingleAttendance } =
@@ -34,9 +35,17 @@ const DepartmentTable = () => {
     return counts.join("<br /><br />");
   };
 
-  const handleClick = (index) => {    
-    setSingleAttendance(attendanceView[index]);
-    navigate("/print?destination=attendance");
+  const handleClick = (index) => {
+    const attendData = {
+      destination: "attendance",
+      singleAttendanceView: JSON.stringify(attendanceView[index]), 
+      dateTime,
+    };
+
+    const queryParams = queryString.stringify(attendData);
+
+    // setSingleAttendance(attendanceView[index]);
+    window.open(`/print?${queryParams}`, "_blank", "noopener,noreferrer");
   };
 
   const filteredResults = filteredData(data, searchTerm);
@@ -86,7 +95,8 @@ const DepartmentTable = () => {
               onClick={() => handleClick(index, idx)} // Pass the index of the button
               type="primary"
             >
-              {row.dept} Attendance Sheet {idx+1} {/* Use the index as the label */}
+              {row.dept} Attendance Sheet {idx + 1}{" "}
+              {/* Use the index as the label */}
             </Button>
           ))}
         </>

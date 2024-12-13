@@ -1,9 +1,15 @@
 import { useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import "../styles/Printdept.css";
+import queryString from "query-string";
 
 const PrintAttendance = () => {
-  const { singleAttendanceView, dateTime } = useAppContext();
+  const parsedQuery = queryString.parse(window.location.search);
+
+  // Parse back the `singleClassView` array
+  const singleAttendanceView = JSON.parse(parsedQuery.singleAttendanceView);
+  const {  dateTime } = parsedQuery;
+
   useEffect(() => {
     const timer = setTimeout(() => {
       window.print();
@@ -18,7 +24,7 @@ const PrintAttendance = () => {
         <thead>
           {/* College Information Row */}
           <tr>
-            <th colSpan="3" style={{ textAlign: "center"}}>
+            <th colSpan="3" style={{ textAlign: "center" }}>
               <strong>JYOTHI ENGINEERING COLLEGE, CHERUTHURUTHY</strong>
             </th>
           </tr>
@@ -36,7 +42,9 @@ const PrintAttendance = () => {
 
           {/* Table Headers */}
           <tr>
-            <th className="header-column">Sl No</th>
+            <th width="300" className="header-column">
+              Sl No
+            </th>
             <th className="header-column">Register Number</th>
             <th className="header-column">{dateTime.substring(0, 10)}</th>
           </tr>
@@ -51,6 +59,24 @@ const PrintAttendance = () => {
               <td></td>
             </tr>
           ))}
+          <tr key="regabs">
+            <td>
+              <strong>Register number of absentees</strong>
+            </td>
+            <td colspan="2"></td>
+          </tr>
+          <tr key="facname">
+            <td>
+              <strong>Name of faculty</strong>
+            </td>
+            <td colspan="2"></td>
+          </tr>
+          <tr key="facsign">
+            <td>
+              <strong>Signature of faculty</strong>
+            </td>
+            <td colspan="2"></td>
+          </tr>
         </tbody>
       </table>
     </>

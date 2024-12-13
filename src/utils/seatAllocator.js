@@ -9,7 +9,7 @@ export const test = (
   examToday,
   savedClasses,
   savedData
-) => {  
+) => {
   let sup = {};
 
   for (let key of Object.keys(exams)) {
@@ -23,8 +23,6 @@ export const test = (
   Object.keys(sup).forEach((key) => {
     deptStrength[`SUP_${key}`] = sup[key].length;
   });
-
-  
 
   function mergeExamSchedules(exams) {
     let updatedExams = {};
@@ -47,9 +45,11 @@ export const test = (
       return mergeExamSchedules(updatedExams);
     else return updatedExams;
   }
+   console.log(exams);
 
   exams = mergeExamSchedules(exams, sup);
-
+   console.log(exams);
+   
   let classes = [],
     lastIndex = 0,
     data = [],
@@ -82,7 +82,7 @@ export const test = (
       acc[key] = value;
       return acc;
     }, {});
-  
+
   let classNames = Object.keys(classCapacity);
 
   for (let i = 0; i < classNames.length; i++) {
@@ -168,7 +168,8 @@ export const test = (
       resultArrayEntries[j + 1] = key;
     }
     const finalResultArray = Object.fromEntries(resultArrayEntries);
-
+    console.log(finalResultArray);
+    
     return finalResultArray;
   }
 
@@ -202,6 +203,8 @@ export const test = (
         delete resultArray[key];
       }
     });
+    console.log(resultArray);
+    
 
     optimizer(arraySorter(resultArray), 2);
     optimizer(arraySorter(resultArray), 1);
@@ -212,7 +215,6 @@ export const test = (
     data = dataArrayMaker(examToday, exams, deptStrength);
   else data = savedData;
 
-  
   let evenBenchIndex = 0;
   let oddBenchIndex = 1;
   let evenRowIndex = 0;
@@ -373,80 +375,36 @@ export const test = (
         const [prefix, num] = item
           .match(/^([A-Z]{3,4}\d{2}[A-Z]{2})(\d{3})$/)
           .slice(1);
-
-        if (!groupedItems[prefix]) groupedItems[prefix] = [];
-        groupedItems[prefix].push(Number(num));
+        if (Object.values(rejoin).some((value) => value.includes(item))) {
+          const prefixrejoin = prefix + "R";
+          if (!groupedItems[prefixrejoin]) groupedItems[prefixrejoin] = [];
+          groupedItems[prefixrejoin].push(Number(num));
+        } else {
+          if (!groupedItems[prefix]) groupedItems[prefix] = [];
+          groupedItems[prefix].push(Number(num));
+        }
       }
     });
 
     return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
       nums.sort((a, b) => a - b);
-      const first = `${prefix}${formatToThreeDigits(nums[0])}`;
-      const last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      let first, last;
 
+      const rejoinList = !/\d/.test(prefix.slice(-3));
+
+      if (rejoinList) {
+        first = `${prefix.slice(0, -1)}${formatToThreeDigits(nums[0])}`;
+        last = `${prefix.slice(0, -1)}${formatToThreeDigits(
+          nums[nums.length - 1]
+        )}`;
+      } else {
+        first = `${prefix}${formatToThreeDigits(nums[0])}`;
+        last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      }
       return [first, last];
     });
   };
-
-  // const consolidateItems = (items) => {
-  //   const groupedItems = {};
-
-  //   items.forEach((item) => {
-  //     if (item != 0) {
-  //       const [prefix, num] = item
-  //         .match(/^([A-Z]{3,4}\d{2}[A-Z]{2})(\d{3})$/)
-  //         .slice(1);
-
-  //       if (!groupedItems[prefix]) groupedItems[prefix] = [];
-  //       groupedItems[prefix].push(Number(num));
-  //       groupedItems[prefix].sort((a, b) => a - b);
-  //     }
-  //   });
-
-  //   const sortedKeys = Object.keys(groupedItems).sort((a, b) => {
-  //     const deptA = a.match(/\d+/)[0];
-  //     const deptB = b.match(/\d+/)[0];
-  //     return deptA.localeCompare(deptB);
-  //   });
-
-  //   sortedKeys.forEach((key) => {
-  //     let ljecKey;
-
-  //     if (key.startsWith("L")) ljecKey = `${key}`;
-  //     else ljecKey = `L${key}`;
-
-  //     console.log(ljecKey);
-
-  //     if (groupedItems[ljecKey]) {
-  //       const jecArray = groupedItems[key];
-  //       const ljecArray = groupedItems[ljecKey];
-  //       groupedItems[key] = [jecArray[0], ljecArray[ljecArray.length - 1]];
-  //       delete groupedItems[ljecKey];
-  //     }
-  //   });
-
-  //   return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
-  //     let lastterm = "";
-  //     if (
-  //       nums[nums.length - 1] >
-  //       deptStrength[prefix.slice(-4)] - letStrength[prefix.slice(-4)]
-  //     ) {
-  //       lastterm = `L${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-  //     } else {
-  //       lastterm = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-  //     }
-  //     let first = `${prefix}${formatToThreeDigits(nums[0])}`;
-  //     let last = lastterm;
-
-  //     const rejoinValues = Object.values(rejoin).flat();
-  //     if (rejoinValues.includes(`L${last}`)) {
-  //       last = `L${last}`;
-  //     }
-
-  //     return [first, last];
-  //   });
-  // };
-
+  
   const calculateCounts = (items, sup) => {
     const counts = [];
 

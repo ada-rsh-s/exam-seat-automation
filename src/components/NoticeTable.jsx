@@ -4,18 +4,23 @@ import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
+import queryString from "query-string";
 
 const NoticeTable = () => {
-  const { noticeBoardView, dateTime, classroomView, setSingleClassView,classNames } =
-    useAppContext();
-    
+  const {
+    noticeBoardView,
+    dateTime,
+    classroomView,
+    setSingleClassView,
+    classNames,
+  } = useAppContext();
+
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     if (noticeBoardView.length > 0) {
-
       setData(noticeBoardView);
     }
   }, [noticeBoardView]);
@@ -38,8 +43,18 @@ const NoticeTable = () => {
     return counts ? counts.join("<br /><br />") : "0";
   };
   const handleClick = (index) => {
-    setSingleClassView(classroomView[index],classNames[index]);
-    navigate("/print?destination=class"); 
+    const classroomData = {
+      destination: "class",
+      singleClassView: JSON.stringify(classroomView[index]), // Convert 2D array to JSON string
+      singleClassName: classNames[index],
+      dateTime,
+    };
+
+    // Stringify classroomData into query parameters
+    const queryParams = queryString.stringify(classroomData);
+
+    // setSingleClassView(classroomView[index],classNames[index]);
+    window.open(`/print?${queryParams}`, "_blank", "noopener,noreferrer");
   };
 
   const columns = [

@@ -615,7 +615,7 @@ const AppProvider = ({ children }) => {
           });
 
         sortedData.forEach((row) => {
-          if (!cancelToken.current) return; 
+          if (!cancelToken.current) return;
 
           const item = {};
           headers.forEach((header, index) => {
@@ -1032,6 +1032,7 @@ const AppProvider = ({ children }) => {
     const dropDocRef = doc(db, "DeptDetails", "Dropped");
     const rejoinDocRef = doc(db, "DeptDetails", "Rejoined");
     const datetimeDocRef = doc(db, "AllExams", "DateTime");
+    const savedClassesDocRef = doc(db, "Classes", "savedClasses");
 
     try {
       const classSnap = await getDoc(examHallDocRef);
@@ -1041,6 +1042,7 @@ const AppProvider = ({ children }) => {
       const dropSnap = await getDoc(dropDocRef);
       const rejoinSnap = await getDoc(rejoinDocRef);
       const datetimeSnap = await getDoc(datetimeDocRef);
+      const savedClassSnap = await getDoc(savedClassesDocRef);
 
       if (
         classSnap.exists() &&
@@ -1051,7 +1053,9 @@ const AppProvider = ({ children }) => {
         rejoinSnap.exists() &&
         datetimeSnap.exists()
       ) {
-        const classCapacity = classSnap.data();
+        const classCapacity = slotExists
+          ? savedClassSnap.data()[selectedSlotName]
+          : classSnap.data();
         const exams = examsSnap.data();
         const letStrength = letSnap.data();
         const deptStrength = regSnap.data();
@@ -1066,26 +1070,9 @@ const AppProvider = ({ children }) => {
             );
             const endTime = dayjs(datetimeData[key][1]).format("hh:mm A");
 
-            // Return the formatted time range
             return `${startTime} - ${endTime}`;
           }, "");
-        
-        // let a = "24-10-2024";
-        // let b = "02-12-2024";
 
-        // let startDate = new Date(a.split("-").reverse().join("-"));
-        // let endDate = new Date(b.split("-").reverse().join("-"));
-
-        // let dateArray = [];
-
-        // while (startDate <= endDate) {
-        //   dateArray.push(
-        //     startDate.toLocaleDateString("en-GB").split("/").join("-")
-        //   );
-        //   startDate.setDate(startDate.getDate() + 1);
-        // }
-
-        // console.log(dateArray);
         if (dateTime === "") {
           dispatch({
             type: SET_SLOT_LOADING,
@@ -1111,6 +1098,7 @@ const AppProvider = ({ children }) => {
             dateTime,
           },
         });
+        console.log(slotExists);
 
         if (slotExists) {
           showAlert(
@@ -1131,6 +1119,18 @@ const AppProvider = ({ children }) => {
 
             return { savedData, savedClasses };
           }
+        } else {
+          console.log("udpating");
+          
+          await updateDoc(savedClassesDocRef, {
+            [selectedSlotName]: deleteField(),
+          });
+
+          await setDoc(
+            savedClassesDocRef,
+            { [selectedSlotName]: classCapacity },
+            { merge: true }
+          );
         }
       } else {
         dispatch({
@@ -1150,26 +1150,8 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const deleteAllocatedSlot = async (slot) => {
-    showAlert("warning", `Deleting Seating for Slot ${slot} ...`);
-
-    const docRef = doc(db, "AllExams", "SavedSlots");
-    const dataDocRef = doc(db, "AllExams", "SavedData");
-
-    try {
-      await updateDoc(docRef, {
-        [slot]: deleteField(),
-      });
-      await updateDoc(dataDocRef, {
-        [slot]: deleteField(),
-      });
-    } catch (error) {
-      console.error("Error deleting slot: ", error);
-    }
-  };
-
   const setAllocatedData = async (allocatedData, selectedSlotName) => {
-    if (allocatedData != undefined) {
+    if (allocatedData && selectedSlotName) {
       const stringifiedData = [
         JSON.stringify(allocatedData[5]),
         JSON.stringify(allocatedData[6]),
@@ -1191,23 +1173,47 @@ const AppProvider = ({ children }) => {
           },
           { merge: true }
         );
+
+        dispatch({
+          type: SET_ALLOCATED_DATA,
+          payload: {
+            noticeBoardView: allocatedData[0],
+            deptView: allocatedData[1],
+            classroomView: allocatedData[2],
+            attendanceView: allocatedData[3],
+            classNames: allocatedData[4],
+          },
+        });
       } catch (error) {
         console.error("Error saving array: ", error);
       }
-      dispatch({
-        type: SET_ALLOCATED_DATA,
-        payload: {
-          noticeBoardView: allocatedData[0],
-          deptView: allocatedData[1],
-          classroomView: allocatedData[2],
-          attendanceView: allocatedData[3],
-          classNames: allocatedData[4],
-        },
-      });
     } else {
-      showAlert("warning", " TRY AGAIN!");
+      showAlert("warning", "TRY AGAIN!");
     }
   };
+
+  const deleteAllocatedSlot = async (slot) => {
+    showAlert("warning", `Deleting Seating for Slot ${slot} ...`);
+
+    const docRef = doc(db, "AllExams", "SavedSlots");
+    const dataDocRef = doc(db, "AllExams", "SavedData");
+    const savedClassesDocRef = doc(db, "Classes", "savedClasses");
+
+    try {
+      await updateDoc(docRef, {
+        [slot]: deleteField(),
+      });
+      await updateDoc(dataDocRef, {
+        [slot]: deleteField(),
+      });
+      await updateDoc(savedClassesDocRef, {
+        [slot]: deleteField(),
+      });
+    } catch (error) {
+      console.error("Error deleting slot: ", error);
+    }
+  };
+
   const setSingleClassView = (singleClassView, className) => {
     dispatch({
       type: SET_SINGLE_CLASS,

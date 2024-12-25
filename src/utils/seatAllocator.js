@@ -45,10 +45,8 @@ export const test = (
       return mergeExamSchedules(updatedExams);
     else return updatedExams;
   }
-   console.log(exams);
 
   exams = mergeExamSchedules(exams, sup);
-   console.log(exams);
    
   let classes = [],
     lastIndex = 0,
@@ -168,7 +166,6 @@ export const test = (
       resultArrayEntries[j + 1] = key;
     }
     const finalResultArray = Object.fromEntries(resultArrayEntries);
-    console.log(finalResultArray);
     
     return finalResultArray;
   }
@@ -203,9 +200,7 @@ export const test = (
         delete resultArray[key];
       }
     });
-    console.log(resultArray);
     
-
     optimizer(arraySorter(resultArray), 2);
     optimizer(arraySorter(resultArray), 1);
     return data;
@@ -634,7 +629,8 @@ export const test = (
   const classroomView = classes.map((cls) => {
     return classroomViewMaker(cls);
   });
-
+  console.log(classCapacity);
+  
   return [
     noticeBoardView,
     deptView,

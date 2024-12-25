@@ -26,6 +26,7 @@ const TodayExam = () => {
     seatingExists,
     deleteAllocatedSlot,
   } = useAppContext();
+  
   const [slotNames, setSlotNames] = useState([]);
   const [savedClasses, setSavedClasses] = useState(null);
   const [savedData, setSavedData] = useState(null);

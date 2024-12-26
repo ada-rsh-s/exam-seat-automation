@@ -8,7 +8,9 @@ const PrintAttendance = () => {
 
   // Parse back the `singleClassView` array
   const singleAttendanceView = JSON.parse(parsedQuery.singleAttendanceView);
-  const {  dateTime } = parsedQuery;
+  const { dateTime } = parsedQuery;
+  console.log(dateTime);
+  
 
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1094,11 +1094,13 @@ const AppProvider = ({ children }) => {
             return { savedData, savedClasses };
           }
         } else {
-          console.log("udpating");
-
-          await updateDoc(savedClassesDocRef, {
-            [selectedSlotName]: deleteField(),
-          });
+          console.log("No saved data found !");
+          const docSnap = await getDoc(savedClassesDocRef);
+          
+          if (docSnap.exists())
+            await updateDoc(savedClassesDocRef, {
+              [selectedSlotName]: deleteField(),
+            });
 
           await setDoc(
             savedClassesDocRef,

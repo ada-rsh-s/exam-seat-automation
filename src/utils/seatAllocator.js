@@ -7,10 +7,12 @@ export const test = (
   drop,
   rejoin,
   examToday,
-  savedClasses,
-  savedData
+  savedClasses=[],
+  savedData=[]
 ) => {
   let sup = {};
+  console.log(savedClasses,savedData);
+  
 
   for (let key of Object.keys(exams)) {
     exams[key] = exams[key].filter((exam) => examToday.includes(exam));

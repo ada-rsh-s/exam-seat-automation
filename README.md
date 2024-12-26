@@ -1,6 +1,8 @@
 #Exam Seat Automation
 
 BUGS
+first years issue 
+attendance sheet column
 classroom edit option
 batches subject edit option
 save class option -- SOLVED

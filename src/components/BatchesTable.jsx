@@ -29,7 +29,7 @@ const BatchesTable = () => {
   }, []);
 
   useEffect(() => {
-    if(academicYear){
+    if (academicYear) {
       fetchBatches(academicYear).then((data) => {
         setData(data);
       });
@@ -72,7 +72,22 @@ const BatchesTable = () => {
     },
     {
       name: "Subjects",
-      selector: (row) => row.exams.join(" ║ "),
+      selector: (row) =>
+        editingKey === row.deptName ? (
+          <Select
+            mode="tags"
+            style={{ width: "100%" }}
+            placeholder={`Add Exams for ${row.deptName}`}
+            value={editData.exams}
+            onChange={(value) => handleChange(value, "exams")}
+            options={editData.options.map((exam) => ({
+              value: exam,
+              label: exam,
+            }))}
+          />
+        ) : (
+          row.exams.join(" ║ ")
+        ),
       sortable: true,
       width: "400px",
       wrap: true,

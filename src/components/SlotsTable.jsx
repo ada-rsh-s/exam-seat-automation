@@ -83,7 +83,6 @@ const SlotsTable = () => {
         ),
       wrap: true,
       width: "700px",
-
       sortable: true,
     },
     {

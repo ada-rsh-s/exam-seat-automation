@@ -138,47 +138,12 @@ const AppProvider = ({ children }) => {
     removeUserFromTheLocalStorage();
   };
 
-  // const batchesForm = async (depts) => {
-
-  //   showAlert("loading", "Updating Batch Details ...");
-  //   const SubdocRef = doc(firestore, "DeptDetails", "Exams");
-  //   const LetdocRef = doc(firestore, "DeptDetails", "LetStrength");
-  //   const RegdocRef = doc(firestore, "DeptDetails", "RegularStrength");
-  //   const dropdocRef = doc(firestore, "DeptDetails", "Dropped");
-  //   const rejoindocRef = doc(firestore, "DeptDetails", "Rejoined");
-
-  //   const getDeptFields = (key) =>
-  //     depts.reduce(
-  //       (acc, dept) => ({
-  //         ...acc,
-  //         [dept.name]: dept[key],
-  //       }),
-  //       {}
-  //     );
-
-  //   const SubFields = getDeptFields("initialValues");
-  //   const RegFields = getDeptFields("reg");
-  //   const LetFields = getDeptFields("let");
-  //   const dropFields = getDeptFields("drop");
-  //   const rejoinFields = getDeptFields("rejoin");
-
-  //   try {
-  //     await setDoc(SubdocRef, SubFields, { merge: true });
-  //     await setDoc(RegdocRef, RegFields, { merge: true });
-  //     await setDoc(LetdocRef, LetFields, { merge: true });
-  //     await setDoc(dropdocRef, dropFields, { merge: true });
-  //     await setDoc(rejoindocRef, rejoinFields, { merge: true });
-
-  //     showAlert("success", "Batch Details Updated Successfully !");
-  //   } catch (error) {
-  //     showAlert("error", error.message);
-  //     throw new Error(`${error.message}`);
-  //   }
-  // };
-
   const batchesForm = async (depts) => {
+    console.log(depts);
+
     showAlert("loading", "Updating Batch Details ...");
     const SubdocRef = doc(firestore, "DeptDetails", "Exams");
+    const SubCopydocRef = doc(firestore, "DeptDetails", "ExamsCopy");
     const LetdocRef = doc(firestore, "DeptDetails", "LetStrength");
     const RegdocRef = doc(firestore, "DeptDetails", "RegularStrength");
     const dropdocRef = doc(firestore, "DeptDetails", "Dropped");
@@ -197,14 +162,17 @@ const AppProvider = ({ children }) => {
       }, {});
 
     const SubFields = getDeptFields("initialValues");
+    const SubCopyFields = getDeptFields("initialValues");
     const RegFields = getDeptFields("reg");
     const LetFields = getDeptFields("let");
     const dropFields = getDeptFields("drop");
     const rejoinFields = getDeptFields("rejoin");
 
     try {
-      if (Object.keys(SubFields).length > 0)
+      if (Object.keys(SubFields).length > 0) {
         await setDoc(SubdocRef, SubFields, { merge: true });
+        await setDoc(SubCopydocRef, SubCopyFields, { merge: true });
+      }
       if (Object.keys(RegFields).length > 0)
         await setDoc(RegdocRef, RegFields, { merge: true });
       if (Object.keys(LetFields).length > 0)
@@ -230,15 +198,17 @@ const AppProvider = ({ children }) => {
     ];
 
     const examsRef = doc(firestore, "DeptDetails", "Exams");
+    const examsCopyRef = doc(firestore, "DeptDetails", "ExamsCopy");
     const regStrengthRef = doc(firestore, "DeptDetails", "RegularStrength");
     const letStrengthRef = doc(firestore, "DeptDetails", "LetStrength");
     const dropRef = doc(firestore, "DeptDetails", "Dropped");
     const rejoinRef = doc(firestore, "DeptDetails", "Rejoined");
 
     try {
-      const [examsSnap, regSnap, letSnap, dropSnap, rejoinSnap] =
+      const [examsSnap, examsCopySnap, regSnap, letSnap, dropSnap, rejoinSnap] =
         await Promise.all([
           getDoc(examsRef),
+          getDoc(examsCopyRef),
           getDoc(regStrengthRef),
           getDoc(letStrengthRef),
           getDoc(dropRef),
@@ -249,6 +219,7 @@ const AppProvider = ({ children }) => {
 
       if (
         examsSnap.exists() &&
+        examsCopySnap.exists() &&
         regSnap.exists() &&
         letSnap.exists() &&
         dropSnap.exists() &&
@@ -265,6 +236,7 @@ const AppProvider = ({ children }) => {
         };
 
         const examsData = filterFields(examsSnap.data());
+        const examsCopyData = filterFields(examsCopySnap.data());
         const regData = filterFields(regSnap.data());
         const letData = filterFields(letSnap.data());
         const dropData = filterFields(dropSnap.data());
@@ -273,6 +245,7 @@ const AppProvider = ({ children }) => {
         // Get all department names (assuming all snaps have the same department keys)
         const deptNames = Object.keys({
           ...examsData,
+          ...examsCopyData,
           ...regData,
           ...letData,
           ...dropData,
@@ -285,6 +258,7 @@ const AppProvider = ({ children }) => {
             letStrength: letData[deptName] || null,
             regStrength: regData[deptName] || null,
             exams: examsData[deptName] || [],
+            options: examsCopyData[deptName] || [],
             drop: dropData[deptName] || null,
             rejoin: rejoinData[deptName] || null,
           });
@@ -1121,7 +1095,7 @@ const AppProvider = ({ children }) => {
           }
         } else {
           console.log("udpating");
-          
+
           await updateDoc(savedClassesDocRef, {
             [selectedSlotName]: deleteField(),
           });

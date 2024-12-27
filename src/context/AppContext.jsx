@@ -603,9 +603,13 @@ const AppProvider = ({ children }) => {
             throw new Error(`Duplicate classrooms found: ${classroom}`);
           }
           classroomSet.add(classroom);
+          console.log(classroom, desks);
 
           if (classroom && desks) {
-            if (classroom === "WAB 412" || classroom === "EAB 310") {
+            if (
+              classroom.replace(/\s/g, "") === "WAB412" ||
+              classroom.replace(/\s/g, "") === "EAB310"
+            ) {
               let columns = 3;
 
               // Find the maximum columns such that rows > columns
@@ -626,7 +630,7 @@ const AppProvider = ({ children }) => {
               // Calculate the final rows with the valid number of columns
               classesData[classroom] = [Math.floor(desks / columns), columns];
             } else {
-              classesData[classroom] = [desks, 2]; // Default case
+              classesData[classroom] = [Math.floor(desks), 2]; // Default case
             }
 
             processedItems++;
@@ -637,15 +641,18 @@ const AppProvider = ({ children }) => {
       }
 
       // Upload the accumulated classes data to Firebase
+      const UploadedClassesDocRef = doc(db, "Classes", "UploadedClasses");
       const classesDocRef = doc(db, "Classes", "AvailableClasses");
       const allottedclassesDocRef = doc(db, "Classes", "AllotedClasses");
 
       // Delete existing documents
       await deleteDoc(classesDocRef);
       await deleteDoc(allottedclassesDocRef);
+      await deleteDoc(UploadedClassesDocRef);
 
       await setDoc(classesDocRef, classesData, { merge: true });
       await setDoc(allottedclassesDocRef, classesData, { merge: true });
+      await setDoc(UploadedClassesDocRef, classesData, { merge: true });
 
       if (cancelToken.current) {
         showAlert("success", "Classroom and desk data updated!");
@@ -883,24 +890,35 @@ const AppProvider = ({ children }) => {
 
   const fetchExamHalls = async () => {
     showAlert("loading", "Fetching Exam Halls ...");
+    const accDocRef = doc(db, "Classes", "UploadedClasses");
     const availDocRef = doc(db, "Classes", "AvailableClasses");
     const allotDocRef = doc(db, "Classes", "AllotedClasses");
 
     try {
+      const accdocSnap = await getDoc(accDocRef);
       const availdocSnap = await getDoc(availDocRef);
       const allotdocSnap = await getDoc(allotDocRef);
 
-      if (availdocSnap.exists() && allotdocSnap.exists()) {
+      if (
+        availdocSnap.exists() &&
+        allotdocSnap.exists() &&
+        accdocSnap.exists()
+      ) {
+        const accdocData = accdocSnap.data();
         const availdocData = availdocSnap.data();
         const allotdocData = allotdocSnap.data();
 
         const sortedData = Object.keys(availdocData)
           .map((key) => {
-            const [rows, columns] = availdocData[key]; // Assuming docData is availdocData
+            const [accrows, acccolumns] = accdocData[key];
+            const [rows, columns] = availdocData[key];
+
+            const actualCapacity = accrows * acccolumns;
             const totalCapacity = rows * columns;
             return {
               Hall: key,
-              Capacity: totalCapacity,
+              currCapacity: totalCapacity,
+              accCapacity: actualCapacity,
               rowcol: [rows, columns],
               alloted: allotdocData.hasOwnProperty(key),
             };
@@ -916,6 +934,29 @@ const AppProvider = ({ children }) => {
       console.error("Error fetching document: ", error);
       return [];
     }
+  };
+  const updateExamHalls = async (data) => {
+    const updatedData = data.reduce(
+      (acc, hall) => {
+        // By default, all halls are added to the available object
+        acc.available[hall.Hall] = hall.rowcol;
+
+        // If hall is alloted, move it to the alloted object
+        if (hall.alloted) {
+          acc.alloted[hall.Hall] = hall.rowcol;
+        }
+
+        return acc;
+      },
+      { alloted: {}, available: {} } // Initial accumulator with both alloted and available objects
+    );
+
+    console.log(updatedData);
+    const classesDocRef = doc(db, "Classes", "AvailableClasses");
+    const allottedclassesDocRef = doc(db, "Classes", "AllotedClasses");
+
+    await setDoc(classesDocRef, updatedData.available, { merge: true });
+    await setDoc(allottedclassesDocRef, updatedData.alloted, { merge: true });
   };
 
   const allotExamHall = async (examhalls) => {
@@ -1225,6 +1266,7 @@ const AppProvider = ({ children }) => {
         fetchSlots,
         uploadExamhallFile,
         fetchExamHalls,
+        updateExamHalls,
         updateSlots,
         fetchExamData,
         fetchslotNames,

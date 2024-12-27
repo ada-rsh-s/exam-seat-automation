@@ -47,6 +47,7 @@ const TableContainer = ({
   selectableRowSelected,
   handleRowSelected,
   dateTime,
+  search,
 }) => {
   return (
     <div className="table-container">
@@ -81,13 +82,15 @@ const TableContainer = ({
           </ConfigProvider>
         )}
         <div className="search-container">
-          <Input
-            size="large"
-            placeholder="Type to search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            prefix={<SearchOutlined />}
-          />
+          {!search && (
+            <Input
+              size="large"
+              placeholder="Type to search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              prefix={<SearchOutlined />}
+            />
+          )}
         </div>
       </div>
       <div className="table-wrapper">

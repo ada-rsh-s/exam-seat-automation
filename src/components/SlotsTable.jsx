@@ -82,7 +82,7 @@ const SlotsTable = () => {
           row.Exams.join(" ║ ")
         ),
       wrap: true,
-      width: "700px",
+      width: "650px",
       sortable: true,
     },
     {

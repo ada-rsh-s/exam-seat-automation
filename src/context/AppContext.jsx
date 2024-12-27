@@ -936,27 +936,32 @@ const AppProvider = ({ children }) => {
     }
   };
   const updateExamHalls = async (data) => {
-    const updatedData = data.reduce(
-      (acc, hall) => {
-        // By default, all halls are added to the available object
-        acc.available[hall.Hall] = hall.rowcol;
+    showAlert("loading", "Updating Capacity ...");
+    try {
+      const updatedData = data.reduce(
+        (acc, hall) => {
+          acc.available[hall.Hall] = hall.rowcol;
 
-        // If hall is alloted, move it to the alloted object
-        if (hall.alloted) {
-          acc.alloted[hall.Hall] = hall.rowcol;
-        }
+          // If hall is alloted, move it to the alloted object
+          if (hall.alloted) {
+            acc.alloted[hall.Hall] = hall.rowcol;
+          }
 
-        return acc;
-      },
-      { alloted: {}, available: {} } // Initial accumulator with both alloted and available objects
-    );
+          return acc;
+        },
+        { alloted: {}, available: {} }
+      );
 
-    console.log(updatedData);
-    const classesDocRef = doc(db, "Classes", "AvailableClasses");
-    const allottedclassesDocRef = doc(db, "Classes", "AllotedClasses");
+      const classesDocRef = doc(db, "Classes", "AvailableClasses");
+      const allottedclassesDocRef = doc(db, "Classes", "AllotedClasses");
 
-    await setDoc(classesDocRef, updatedData.available, { merge: true });
-    await setDoc(allottedclassesDocRef, updatedData.alloted, { merge: true });
+      await setDoc(classesDocRef, updatedData.available, { merge: true });
+      await setDoc(allottedclassesDocRef, updatedData.alloted, { merge: true });
+      showAlert("success", "Capacity Updated Successfully !");
+    } catch (error) {
+      showAlert("error", error.message);
+      console.error(error);
+    }
   };
 
   const allotExamHall = async (examhalls) => {

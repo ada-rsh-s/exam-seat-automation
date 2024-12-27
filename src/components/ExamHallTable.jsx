@@ -104,7 +104,7 @@ const ExamHallTable = () => {
             <InputNumber
               size="large"
               min={0}
-              max={160}
+              max={row.accCapacity}
               placeholder="Current Capacity"
               style={{ width: "100%", marginTop: "20px" }}
               value={editData.currCapacity}

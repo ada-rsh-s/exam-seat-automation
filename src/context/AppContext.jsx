@@ -1039,12 +1039,12 @@ const AppProvider = ({ children }) => {
         const dateTime = Object.keys(datetimeData)
           .filter((key) => key.startsWith(selectedSlotName))
           .reduce((formatted, key) => {
-            const startTime = dayjs(datetimeData[key][0]).format(
-              "DD-MM-YYYY | hh:mm A"
-            );
+            const startDate = dayjs(datetimeData[key][0]).format("DD-MM-YYYY");
+            const endDate = dayjs(datetimeData[key][1]).format("DD-MM-YYYY");
+            const startTime = dayjs(datetimeData[key][0]).format("hh:mm A");
             const endTime = dayjs(datetimeData[key][1]).format("hh:mm A");
 
-            return `${startTime} - ${endTime}`;
+            return `${startDate} - ${endDate} | ${startTime} - ${endTime}`;
           }, "");
 
         if (dateTime === "") {
@@ -1096,7 +1096,7 @@ const AppProvider = ({ children }) => {
         } else {
           console.log("No saved data found !");
           const docSnap = await getDoc(savedClassesDocRef);
-          
+
           if (docSnap.exists())
             await updateDoc(savedClassesDocRef, {
               [selectedSlotName]: deleteField(),

@@ -2,8 +2,8 @@
 
 BUGS
 first years issue 
-attendance sheet from and to date
-classroom edit option -- SOLVED
+classroom edit option
+attendance sheet from and to date noticeboard -- SOLVED
 add close button and timer safety -- SOLVED
 batches subject edit option -- SOLVED
 save class option -- SOLVED

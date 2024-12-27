@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import "../styles/Printdept.css";
 import queryString from "query-string";
@@ -6,11 +6,30 @@ import queryString from "query-string";
 const PrintAttendance = () => {
   const parsedQuery = queryString.parse(window.location.search);
 
-  // Parse back the `singleClassView` array
   const singleAttendanceView = JSON.parse(parsedQuery.singleAttendanceView);
   const { dateTime } = parsedQuery;
-  console.log(dateTime);
-  
+  const [dateArray, setDateArray] = useState([]);
+  useEffect(() => {
+    // Extract and process the date range
+    const dateRange = dateTime.split(" | ")[0];
+    const [startDate, endDate] = dateRange
+      .split(" - ")
+      .map((date) => date.split("-").reverse().join("-")); // Convert to YYYY-MM-DD
+
+    // Generate the array of dates
+    const generatedDates = [];
+    for (
+      let d = new Date(startDate);
+      d <= new Date(endDate);
+      d.setDate(d.getDate() + 1)
+    ) {
+      const day = d.getDate().toString().padStart(2, "0");
+      const month = (d.getMonth() + 1).toString().padStart(2, "0");
+      const year = d.getFullYear().toString().slice(-2); // Extract last 2 digits of the year
+      generatedDates.push(`${day}-${month}-${year}`);
+    }
+    setDateArray(generatedDates);
+  }, [dateTime]); // Dependencies ensure this runs once
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,63 +40,65 @@ const PrintAttendance = () => {
 
   return (
     <>
-      {/* Attendance Table with College Information inside */}
       <table style={{ width: "90%", marginLeft: "60px" }} className="table">
         <thead>
-          {/* College Information Row */}
           <tr>
-            <th colSpan="3" style={{ textAlign: "center" }}>
+            <th colSpan={2 + dateArray.length} style={{ textAlign: "center" }}>
               <strong>JYOTHI ENGINEERING COLLEGE, CHERUTHURUTHY</strong>
             </th>
           </tr>
           <tr>
-            <th colSpan="3" style={{ textAlign: "center", padding: "5px" }}>
+            <th
+              colSpan={2 + dateArray.length}
+              style={{ textAlign: "center", padding: "5px" }}
+            >
               <strong>
-                Class : {singleAttendanceView[0].deptRoom.substring(0, 4)}
+                Class: {singleAttendanceView[0].deptRoom.substring(0, 4)}
               </strong>{" "}
               |{" "}
-              <strong>
-                Room : {singleAttendanceView[0].deptRoom.slice(4)}
-              </strong>
+              <strong>Room: {singleAttendanceView[0].deptRoom.slice(4)}</strong>
             </th>
           </tr>
-
-          {/* Table Headers */}
           <tr>
             <th width="300" className="header-column">
               Sl No
             </th>
             <th className="header-column">Register Number</th>
-            <th className="header-column">{dateTime.substring(0, 10)}</th>
+            {dateArray.map((date) => (
+              <th key={date} className="header-column">
+                {date}
+              </th>
+            ))}
           </tr>
         </thead>
 
-        {/* Table Body */}
         <tbody>
           {singleAttendanceView.map((item, index) => (
             <tr key={item.slNo}>
               <td>{index + 1}</td>
               <td className="class-column">{item.regNo}</td>
-              <td></td>
+              {dateArray.map((date) => (
+                <td key={`${item.regNo}-${date}`} className="class-column"></td>
+              ))}
             </tr>
           ))}
           <tr key="regabs">
             <td>
               <strong>Register number of absentees</strong>
             </td>
-            <td colspan="2"></td>
+            <td colSpan={dateArray.length + 1}></td>
           </tr>
           <tr key="facname">
             <td>
               <strong>Name of faculty</strong>
             </td>
-            <td colspan="2"></td>
+            <td colSpan={dateArray.length + 1}></td>
           </tr>
           <tr key="facsign">
             <td>
               <strong>Signature of faculty</strong>
             </td>
-            <td colspan="2"></td>
+            <td colSpan={dateArray.length + 1}></td>
           </tr>
         </tbody>
       </table>

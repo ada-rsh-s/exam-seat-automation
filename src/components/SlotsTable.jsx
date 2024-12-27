@@ -100,12 +100,12 @@ const SlotsTable = () => {
         ) : row.Date ? (
           dayjs(row.Date[0]).format("DD-MM-YYYY hh:mm A") +
           " to " +
-          dayjs(row.Date[1]).format("hh:mm A")
+          dayjs(row.Date[1]).format("DD-MM-YYYY hh:mm A")
         ) : (
           "No Date & Time Allotted"
         ),
       wrap: true,
-      width: "400px",
+      width: "450px",
 
       sortable: true,
     },

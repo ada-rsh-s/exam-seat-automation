@@ -25,7 +25,6 @@ const ExamHallTable = () => {
       );
       setPreselectedRows(defaultSelectedRows);
     });
-    
   }, [fetchExamHalls]);
 
   const handleEdit = (key) => {
@@ -37,6 +36,8 @@ const ExamHallTable = () => {
 
   const handleSave = async () => {
     const { Hall, rowcol, currCapacity } = editData;
+
+    console.log(editData);
 
     if (
       Hall.replace(/\s/g, "") === "WAB412" ||
@@ -58,13 +59,16 @@ const ExamHallTable = () => {
       rowcol[0] = Math.floor(desks / columns);
       rowcol[1] = columns;
     } else {
-      rowcol[0] = Math.floor(currCapacity / 2);
+      editData.currCapacity = editData.currCapacity * 2;
+
+      rowcol[0] = Math.floor(currCapacity);
       rowcol[1] = 2;
     }
 
     const newData = data.map((item) =>
       item.Hall === editingKey ? editData : item
     );
+    console.log(newData);
 
     await updateExamHalls(newData);
     setData(newData);
@@ -104,7 +108,12 @@ const ExamHallTable = () => {
             <InputNumber
               size="large"
               min={0}
-              max={row.accCapacity}
+              max={
+                row.Hall.replace(/\s/g, "") === "WAB412" ||
+                row.Hall.replace(/\s/g, "") === "EAB310"
+                  ? row.accCapacity
+                  : row.accCapacity / 2
+              }
               placeholder="Current Capacity"
               style={{ width: "100%", marginTop: "20px" }}
               value={editData.currCapacity}
@@ -185,7 +194,7 @@ const ExamHallTable = () => {
       return preselectedRows.some((selected) => selected.Hall === row.Hall);
     },
     handleRowSelected,
-    search:true
+    search: true,
   };
 
   return (

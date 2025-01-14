@@ -7,6 +7,7 @@ export const test = (
   drop,
   rejoin,
   examToday,
+  deptStart,
   savedClasses = [],
   savedData = []
 ) => {
@@ -221,7 +222,8 @@ export const test = (
 
   const seatArr = (n, sub, b1) => {
     if (n === 0) return;
-    let num = 1;
+     let num;
+     num = deptStart[sub];
     let benchIndex = b1 % 2 === 0 ? evenBenchIndex : oddBenchIndex;
     let rowIndex = b1 % 2 === 0 ? evenRowIndex : oddRowIndex;
     let classIndex = b1 % 2 === 0 ? evenClassIndex : oddClassIndex;

@@ -22,6 +22,7 @@ const TodayExam = () => {
     exams,
     drop,
     rejoin,
+    deptStart,
     examToday,
     setAllocatedData,
     selectedSlotName,
@@ -87,7 +88,8 @@ const TodayExam = () => {
       exams &&
       drop &&
       rejoin &&
-      examToday &&
+      examToday && 
+      deptStart &&
       selectedSlotName
     ) {
       if (slotChanged && savedClasses !== null && savedData !== null) {
@@ -100,6 +102,7 @@ const TodayExam = () => {
             drop,
             rejoin,
             examToday,
+            deptStart,
             savedClasses,
             savedData
           );

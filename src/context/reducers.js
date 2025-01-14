@@ -49,6 +49,7 @@ const reducer = (state, action) => {
         drop: action.payload.drop,
         rejoin: action.payload.rejoin,
         examToday: action.payload.examToday,
+        deptStart: action.payload.deptStart,
         selectedSlotName: action.payload.selectedSlotName,
         dateTime: action.payload.dateTime,
       };

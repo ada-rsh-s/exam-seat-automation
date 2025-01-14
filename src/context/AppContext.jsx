@@ -1073,6 +1073,7 @@ const AppProvider = ({ children }) => {
     const rejoinDocRef = doc(db, "DeptDetails", "Rejoined");
     const datetimeDocRef = doc(db, "AllExams", "DateTime");
     const savedClassesDocRef = doc(db, "Classes", "savedClasses");
+    const startRef = doc(db, "DeptDetails", "StartingRollNo");
 
     try {
       const classSnap = await getDoc(examHallDocRef);
@@ -1083,6 +1084,7 @@ const AppProvider = ({ children }) => {
       const rejoinSnap = await getDoc(rejoinDocRef);
       const datetimeSnap = await getDoc(datetimeDocRef);
       const savedClassSnap = await getDoc(savedClassesDocRef);
+      const startSnap = await getDoc(startRef);
 
       if (
         classSnap.exists() &&
@@ -1091,7 +1093,8 @@ const AppProvider = ({ children }) => {
         regSnap.exists() &&
         dropSnap.exists() &&
         rejoinSnap.exists() &&
-        datetimeSnap.exists()
+        datetimeSnap.exists() &&
+        startSnap.exists()
       ) {
         const classCapacity = slotExists
           ? savedClassSnap.data()[selectedSlotName]
@@ -1102,6 +1105,7 @@ const AppProvider = ({ children }) => {
         const drop = Object.values(dropSnap.data()).flat();
         const rejoin = rejoinSnap.data();
         const datetimeData = datetimeSnap.data();
+        const deptStart = startSnap.data();
         const dateTime = Object.keys(datetimeData)
           .filter((key) => key.startsWith(selectedSlotName))
           .reduce((formatted, key) => {
@@ -1134,11 +1138,11 @@ const AppProvider = ({ children }) => {
             drop,
             rejoin,
             examToday,
+            deptStart,
             selectedSlotName,
             dateTime,
           },
         });
-        console.log(slotExists);
 
         if (slotExists) {
           showAlert(

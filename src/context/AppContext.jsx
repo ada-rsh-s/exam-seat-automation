@@ -148,6 +148,7 @@ const AppProvider = ({ children }) => {
     const RegdocRef = doc(firestore, "DeptDetails", "RegularStrength");
     const dropdocRef = doc(firestore, "DeptDetails", "Dropped");
     const rejoindocRef = doc(firestore, "DeptDetails", "Rejoined");
+    const startDocRef = doc(firestore, "DeptDetails", "StartingRollNo");
 
     const getDeptFields = (key) =>
       depts.reduce((acc, dept) => {
@@ -167,6 +168,8 @@ const AppProvider = ({ children }) => {
     const LetFields = getDeptFields("let");
     const dropFields = getDeptFields("drop");
     const rejoinFields = getDeptFields("rejoin");
+    const startFields = getDeptFields("start");
+
 
     try {
       if (Object.keys(SubFields).length > 0) {
@@ -181,6 +184,8 @@ const AppProvider = ({ children }) => {
         await setDoc(dropdocRef, dropFields, { merge: true });
       if (Object.keys(rejoinFields).length > 0)
         await setDoc(rejoindocRef, rejoinFields, { merge: true });
+      if (Object.keys(startFields).length > 0)
+        await setDoc(startDocRef, startFields, { merge: true });
 
       showAlert("success", "Batch Details Updated Successfully !");
     } catch (error) {
@@ -203,9 +208,10 @@ const AppProvider = ({ children }) => {
     const letStrengthRef = doc(firestore, "DeptDetails", "LetStrength");
     const dropRef = doc(firestore, "DeptDetails", "Dropped");
     const rejoinRef = doc(firestore, "DeptDetails", "Rejoined");
+    const startRef = doc(firestore, "DeptDetails", "StartingRollNo");
 
     try {
-      const [examsSnap, examsCopySnap, regSnap, letSnap, dropSnap, rejoinSnap] =
+      const [examsSnap, examsCopySnap, regSnap, letSnap, dropSnap, rejoinSnap,startSnap] =
         await Promise.all([
           getDoc(examsRef),
           getDoc(examsCopyRef),
@@ -213,6 +219,7 @@ const AppProvider = ({ children }) => {
           getDoc(letStrengthRef),
           getDoc(dropRef),
           getDoc(rejoinRef),
+          getDoc(startRef),
         ]);
 
       const formattedData = [];
@@ -223,7 +230,8 @@ const AppProvider = ({ children }) => {
         regSnap.exists() &&
         letSnap.exists() &&
         dropSnap.exists() &&
-        rejoinSnap.exists()
+        rejoinSnap.exists() &&
+        startSnap.exists()
       ) {
         // Get all department names that start with the items in the years array
         const filterFields = (data) => {
@@ -241,6 +249,7 @@ const AppProvider = ({ children }) => {
         const letData = filterFields(letSnap.data());
         const dropData = filterFields(dropSnap.data());
         const rejoinData = filterFields(rejoinSnap.data());
+        const startData = filterFields(startSnap.data());
 
         // Get all department names (assuming all snaps have the same department keys)
         const deptNames = Object.keys({
@@ -250,17 +259,19 @@ const AppProvider = ({ children }) => {
           ...letData,
           ...dropData,
           ...rejoinData,
+          ...startData,
         });
 
         deptNames.forEach((deptName) => {
           formattedData.push({
             deptName,
-            letStrength: letData[deptName] || null,
-            regStrength: regData[deptName] || null,
+            letStrength: letData[deptName] || 0,
+            regStrength: regData[deptName] || 0,
             exams: examsData[deptName] || [],
             options: examsCopyData[deptName] || [],
             drop: dropData[deptName] || null,
             rejoin: rejoinData[deptName] || null,
+            start: startData[deptName] || 0,
           });
         });
       }
@@ -837,6 +848,8 @@ const AppProvider = ({ children }) => {
   };
 
   const updateBatches = async (data) => {
+    console.log(data);
+    
     showAlert("loading", "Updating Batches ...");
     try {
       const examsRef = doc(firestore, "DeptDetails", "Exams");
@@ -844,6 +857,7 @@ const AppProvider = ({ children }) => {
       const letStrengthRef = doc(firestore, "DeptDetails", "LetStrength");
       const dropRef = doc(firestore, "DeptDetails", "Dropped");
       const rejoinRef = doc(firestore, "DeptDetails", "Rejoined");
+      const startRef = doc(firestore, "DeptDetails", "StartingRollNo");
 
       // Prepare objects to store updates
       const examsUpdates = {};
@@ -851,6 +865,7 @@ const AppProvider = ({ children }) => {
       const letStrengthUpdates = {};
       const dropUpdates = {};
       const rejoinUpdates = {};
+      const startUpdates = {};
 
       // Process each item from the data
       data.forEach((item) => {
@@ -859,6 +874,7 @@ const AppProvider = ({ children }) => {
         letStrengthUpdates[item.deptName] = item.letStrength;
         dropUpdates[item.deptName] = item.drop;
         rejoinUpdates[item.deptName] = item.rejoin;
+        startUpdates[item.deptName] = item.start;
       });
 
       if (Object.keys(examsUpdates).length > 0) {
@@ -879,6 +895,10 @@ const AppProvider = ({ children }) => {
 
       if (Object.keys(rejoinUpdates).length > 0) {
         await setDoc(rejoinRef, rejoinUpdates, { merge: true });
+      }
+
+      if (Object.keys(startUpdates).length > 0) {
+        await setDoc(startRef, startUpdates, { merge: true });
       }
 
       showAlert("success", "Batches Updated Successfully !");

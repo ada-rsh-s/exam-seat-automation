@@ -12,14 +12,14 @@ const firebaseConfig = {
   appId: env.VITE_APP_ID,
 };
 
-  // const firebaseConfig = {
-  //   apiKey: "AIzaSyCRSrTvxTmaHyyw4W_dyKgW17viY1vmdgI",
-  //   authDomain: "asientomatic-test.firebaseapp.com",
-  //   projectId: "asientomatic-test",
-  //   storageBucket: "asientomatic-test.appspot.com",
-  //   messagingSenderId: "896321721448",
-  //   appId: "1:896321721448:web:6d291369fbde4fcd2557dd",
-  // };
+// const firebaseConfig = {
+//   apiKey: "AIzaSyA-GEd3OjTP8ngLNKnMbnjEUb4FNxUlFLY",
+//   authDomain: "asientomatic.firebaseapp.com",
+//   projectId: "asientomatic",
+//   storageBucket: "asientomatic.firebasestorage.app",
+//   messagingSenderId: "174229598796",
+//   appId: "1:174229598796:web:75a3d96a4f66435be1bae9",
+// };
 
 const app = initializeApp(firebaseConfig);
 

@@ -31,6 +31,8 @@ const BatchesTable = () => {
   useEffect(() => {
     if (academicYear) {
       fetchBatches(academicYear).then((data) => {
+        console.log(data);
+        
         setData(data);
       });
     }
@@ -91,6 +93,36 @@ const BatchesTable = () => {
       sortable: true,
       width: "400px",
       wrap: true,
+    },
+    {
+      name: "Start",
+      selector: (row) =>
+        editingKey == row.deptName ? (
+          <Form.Item
+            initialValue={editData.start}
+            rules={[
+              {
+                required: true,
+                message: "Please enter Starting Roll No",
+              },
+            ]}
+          >
+            <InputNumber
+              size="large"
+              min={0}
+              max={row.regStrength}
+              placeholder="Staring Roll No"
+              style={{ width: "100%" }}
+              value={editData.start}
+              onChange={(value) => handleChange(value, "start")}
+            />
+          </Form.Item>
+        ) : (
+          row.start || 0
+        ),
+      sortable: true,
+      wrap: true,
+      width: "100px",
     },
     {
       name: "Reg",

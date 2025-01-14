@@ -62,6 +62,9 @@ const BatchesForm = () => {
   };
 
   const submitForm = async () => {
+    depts.forEach((dept) => {
+      dept.start = 0;
+    });
     try {
       await batchesForm(depts);
       localStorage.removeItem("depts");

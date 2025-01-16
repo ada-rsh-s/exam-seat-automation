@@ -91,120 +91,242 @@ export const test = (
       .map(() => Array(cols).fill(0));
   }
 
-  Object.keys(exams).forEach((key) => {
-    if (Array.isArray(exams[key]) && exams[key].length === 0) {
-      delete exams[key];
+  // Object.keys(exams).forEach((key) => {
+  //   if (Array.isArray(exams[key]) && exams[key].length === 0) {
+  //     delete exams[key];
+  //   }
+  // });
+
+  // Object.keys(deptStrength).forEach((key) => {
+  //   if (deptStrength[key] === 0) {
+  //     delete deptStrength[key];
+  //   }
+  // });
+
+  // function sortAndGroup(exams) {
+  //   const sortedEntries = Object.entries(deptStrength).sort(
+  //     ([, a], [, b]) => b - a
+  //   );
+
+  //   deptStrength = Object.fromEntries(sortedEntries);
+  //   const groups = {};
+
+  //   Object.entries(exams).forEach(([key, value]) => {
+  //     value = value.sort();
+
+  //     const groupKey = JSON.stringify(value);
+
+  //     if (!groups[groupKey]) {
+  //       groups[groupKey] = [];
+  //     }
+  //     groups[groupKey].push(key);
+  //   });
+
+  //   const Array = Object.values(groups);
+
+  //   return Array;
+  // }
+
+  // const groupedArray = sortAndGroup(exams);
+
+  // let evenGroup = [];
+  // let oddGroup = [];
+  // let evenStrength = 0;
+  // let oddStrength = 0;
+
+  // function groupingAlgo(deptStrength) {
+  //   let prevIndex = -1;
+
+  //   for (let key in deptStrength) {
+  //     const index = groupedArray.findIndex((childArray) =>
+  //       childArray.includes(key)
+  //     );
+
+  //     let value = deptStrength[key];
+
+  //     if (evenStrength > oddStrength) {
+  //       if (index == prevIndex) {
+  //         evenGroup.push([key, value]);
+  //         evenStrength += value;
+  //       } else {
+  //         oddGroup.push([key, value]);
+
+  //         oddStrength += value;
+  //         if (oddStrength > evenStrength) {
+  //           prevIndex = index;
+  //         }
+  //       }
+  //     } else {
+  //       if (index == prevIndex) {
+  //         oddGroup.push([key, value]);
+  //         oddStrength += value;
+  //       } else {
+  //         evenGroup.push([key, value]);
+  //         evenStrength += value;
+  //         if (oddStrength < evenStrength) {
+  //           prevIndex = index;
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
+  // function dataArraymaker(oddGroup, evenGroup) {
+  //   let limit =
+  //     evenGroup.length > oddGroup.length ? oddGroup.length : evenGroup.length;
+  //   let i;
+  //   let index = 0;
+  //   for (i = 0; i < limit; i++) {
+  //     data[index] = evenGroup[i];
+  //     index++;
+  //     data[index] = oddGroup[i];
+  //     index++;
+  //   }
+  //   if (evenGroup.length > oddStrength.length) {
+  //     for (let j = i; j < evenGroup.length; j++) {
+  //       data[index] = evenGroup[i];
+  //       index++;
+  //       data[index] = ["DUM", 0];
+  //       index++;
+  //     }
+  //   } else {
+  //     for (let j = i; j < oddGroup.length; j++) {
+  //       data[index] = ["DUM", 0];
+  //       index++;
+  //       data[index] = oddGroup[i];
+  //       index++;
+  //     }
+  //   }
+  //   return data;
+  // }
+
+  // groupingAlgo(deptStrength);
+
+  // data = dataArraymaker(oddGroup, evenGroup);
+
+  // if (savedData.length === 0) data = dataArraymaker(oddGroup, evenGroup);
+  // else data = savedData;
+  
+  //to calculate strength of odd/even indices
+  function strengthCalculator(n, data) {
+    let strength = 0;
+
+    for (let i = n; i < data.length; i += 2) {
+      strength += data[i][1];
     }
-  });
 
-  Object.keys(deptStrength).forEach((key) => {
-    if (deptStrength[key] === 0) {
-      delete deptStrength[key];
-    }
-  });
+    return strength;
+  }
 
-  function sortAndGroup(exams) {
-    const sortedEntries = Object.entries(deptStrength).sort(
-      ([, a], [, b]) => b - a
-    );
-
-    deptStrength = Object.fromEntries(sortedEntries);
-    const groups = {};
-
-    Object.entries(exams).forEach(([key, value]) => {
-      value = value.sort();
-
-      const groupKey = JSON.stringify(value);
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
+  //for efficient grouping of departments
+  function optimizer(resultArray, n) {
+    for (const key in resultArray) {
+      const subArray = resultArray[key];
+      if (subArray.length > n && n == 1) {
+        continue;
       }
-      groups[groupKey].push(key);
+      const evenStrength = strengthCalculator(0, data);
+      const oddStrength = strengthCalculator(1, data);
+      if (subArray.length >= n) {
+        let sub;
+        if (n === 1) {
+          sub = [subArray[0]];
+        } else {
+          sub = [subArray[0], ["DUM", 0], subArray[1]];
+          if (subArray.length > n) {
+            for (let j = 2; j < subArray.length; j++) {
+              sub = sub.concat([["DUM", 0], subArray[j]]);
+            }
+          }
+        }
+        if (evenStrength > oddStrength) {
+          if (lastIndex % 2 !== 0) {
+            data = data.concat(sub);
+            lastIndex++;
+          } else {
+            data = data.concat([["DUM", 0]], sub);
+          }
+        } else {
+          if (lastIndex % 2 === 0) {
+            data = data.concat(sub);
+            lastIndex++;
+          } else {
+            data = data.concat([["DUM", 0]], sub);
+          }
+        }
+      }
+    }
+  }
+
+  //sorting of the resultArray
+  function arrayStrength(array) {
+    let total = 0;
+    for (let i = 0; i < array[1].length; i++) {
+      total += array[1][i][1];
+    }
+    return total;
+  }
+
+  function arraySorter(resultArray) {
+    let resultArrayEntries = Object.entries(resultArray);
+
+    for (let i = 1; i < resultArrayEntries.length; i++) {
+      let key = resultArrayEntries[i];
+      let j = i - 1;
+      while (
+        j >= 0 &&
+        arrayStrength(resultArrayEntries[j]) < arrayStrength(key)
+      ) {
+        resultArrayEntries[j + 1] = resultArrayEntries[j];
+        j = j - 1;
+      }
+      resultArrayEntries[j + 1] = key;
+    }
+    const finalResultArray = Object.fromEntries(resultArrayEntries);
+    
+    return finalResultArray;
+  }
+
+  function dataArrayMaker(examToday, exams, deptStrength) {
+    const resultArray = {};
+    
+    
+    const deptList = Object.keys(exams);
+    const subList = Object.values(exams);
+
+    const deptSet = new Set();
+
+    examToday.forEach((exam) => {
+      let subArray = [];
+      deptList.forEach((dept, index) => {
+        if (subList[index].includes(exam)) {
+          const num = deptStrength[dept];
+          if (!deptSet.has(dept)) {
+            subArray.push([dept, num]);
+            deptSet.add(dept);
+          }
+        }
+      });
+
+      if (subArray.length > 0) {
+        resultArray[exam] = subArray;
+      }
     });
 
-    const Array = Object.values(groups);
-
-    return Array;
-  }
-
-  const groupedArray = sortAndGroup(exams);
-
-  let evenGroup = [];
-  let oddGroup = [];
-  let evenStrength = 0;
-  let oddStrength = 0;
-
-  function groupingAlgo(deptStrength) {
-    let prevIndex = -1;
-
-    for (let key in deptStrength) {
-      const index = groupedArray.findIndex((childArray) =>
-        childArray.includes(key)
-      );
-
-      let value = deptStrength[key];
-
-      if (evenStrength > oddStrength) {
-        if (index == prevIndex) {
-          evenGroup.push([key, value]);
-          evenStrength += value;
-        } else {
-          oddGroup.push([key, value]);
-
-          oddStrength += value;
-          if (oddStrength > evenStrength) {
-            prevIndex = index;
-          }
-        }
-      } else {
-        if (index == prevIndex) {
-          oddGroup.push([key, value]);
-          oddStrength += value;
-        } else {
-          evenGroup.push([key, value]);
-          evenStrength += value;
-          if (oddStrength < evenStrength) {
-            prevIndex = index;
-          }
-        }
+    Object.keys(resultArray).forEach((key) => {
+      if (resultArray[key].length === 0) {
+        delete resultArray[key];
       }
-    }
-  }
-
-  function dataArraymaker(oddGroup, evenGroup) {
-    let limit =
-      evenGroup.length > oddGroup.length ? oddGroup.length : evenGroup.length;
-    let i;
-    let index = 0;
-    for (i = 0; i < limit; i++) {
-      data[index] = evenGroup[i];
-      index++;
-      data[index] = oddGroup[i];
-      index++;
-    }
-    if (evenGroup.length > oddStrength.length) {
-      for (let j = i; j < evenGroup.length; j++) {
-        data[index] = evenGroup[i];
-        index++;
-        data[index] = ["DUM", 0];
-        index++;
-      }
-    } else {
-      for (let j = i; j < oddGroup.length; j++) {
-        data[index] = ["DUM", 0];
-        index++;
-        data[index] = oddGroup[i];
-        index++;
-      }
-    }
+    });
+    
+    
+    optimizer(arraySorter(resultArray), 2);
+    optimizer(arraySorter(resultArray), 1);
     return data;
   }
 
-  groupingAlgo(deptStrength);
-
-  data = dataArraymaker(oddGroup, evenGroup);
-
-  if (savedData.length === 0) data = dataArraymaker(oddGroup, evenGroup);
+  if (savedData.length === 0)
+    data = dataArrayMaker(examToday, exams, deptStrength);
   else data = savedData;
 
 

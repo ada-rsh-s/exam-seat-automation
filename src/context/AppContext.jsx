@@ -170,7 +170,6 @@ const AppProvider = ({ children }) => {
     const rejoinFields = getDeptFields("rejoin");
     const startFields = getDeptFields("start");
 
-
     try {
       if (Object.keys(SubFields).length > 0) {
         await setDoc(SubdocRef, SubFields, { merge: true });
@@ -211,16 +210,23 @@ const AppProvider = ({ children }) => {
     const startRef = doc(firestore, "DeptDetails", "StartingRollNo");
 
     try {
-      const [examsSnap, examsCopySnap, regSnap, letSnap, dropSnap, rejoinSnap,startSnap] =
-        await Promise.all([
-          getDoc(examsRef),
-          getDoc(examsCopyRef),
-          getDoc(regStrengthRef),
-          getDoc(letStrengthRef),
-          getDoc(dropRef),
-          getDoc(rejoinRef),
-          getDoc(startRef),
-        ]);
+      const [
+        examsSnap,
+        examsCopySnap,
+        regSnap,
+        letSnap,
+        dropSnap,
+        rejoinSnap,
+        startSnap,
+      ] = await Promise.all([
+        getDoc(examsRef),
+        getDoc(examsCopyRef),
+        getDoc(regStrengthRef),
+        getDoc(letStrengthRef),
+        getDoc(dropRef),
+        getDoc(rejoinRef),
+        getDoc(startRef),
+      ]);
 
       const formattedData = [];
 
@@ -387,27 +393,25 @@ const AppProvider = ({ children }) => {
     const slotsDocRef = doc(db, "AllExams", "Slots");
     const editedSlotsDocRef = doc(db, "AllExams", "EditedSlots");
 
-    const examsRef = doc(firestore, "DeptDetails", "Exams");
-    const regStrengthRef = doc(firestore, "DeptDetails", "RegularStrength");
-    const letStrengthRef = doc(firestore, "DeptDetails", "LetStrength");
-    const dropRef = doc(firestore, "DeptDetails", "Dropped");
-    const rejoinRef = doc(firestore, "DeptDetails", "Rejoined");
-
     try {
-      const querySnapshot = await getDocs(subjectsCollection);
+      const collectionsToDelete = [
+        "Subjects",
+        "AllExams",
+        "DeptDetails",
+        "Classes",
+        "users",
+      ];
 
       const batch = writeBatch(db);
-      querySnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
 
-      batch.delete(slotsDocRef);
-      batch.delete(editedSlotsDocRef);
-      batch.delete(examsRef);
-      batch.delete(regStrengthRef);
-      batch.delete(letStrengthRef);
-      batch.delete(dropRef);
-      batch.delete(rejoinRef);
+      for (const collectionName of collectionsToDelete) {
+        const colRef = collection(db, collectionName);
+        const snapshot = await getDocs(colRef);
+
+        snapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+      }
 
       await batch.commit();
 
@@ -849,7 +853,7 @@ const AppProvider = ({ children }) => {
 
   const updateBatches = async (data) => {
     console.log(data);
-    
+
     showAlert("loading", "Updating Batches ...");
     try {
       const examsRef = doc(firestore, "DeptDetails", "Exams");
@@ -868,38 +872,21 @@ const AppProvider = ({ children }) => {
       const startUpdates = {};
 
       // Process each item from the data
-      data.forEach((item) => {
-        examsUpdates[item.deptName] = item.exams;
-        regStrengthUpdates[item.deptName] = item.regStrength;
-        letStrengthUpdates[item.deptName] = item.letStrength;
-        dropUpdates[item.deptName] = item.drop;
-        rejoinUpdates[item.deptName] = item.rejoin;
-        startUpdates[item.deptName] = item.start;
+      data.forEach((item) => {        
+        examsUpdates[item.deptName] = item.exams || [];
+        regStrengthUpdates[item.deptName] = item.regStrength || 0;
+        letStrengthUpdates[item.deptName] = item.letStrength || 0;
+        dropUpdates[item.deptName] = item.drop || [];
+        rejoinUpdates[item.deptName] = item.rejoin || [];
+        startUpdates[item.deptName] = item.start || 0;
       });
 
-      if (Object.keys(examsUpdates).length > 0) {
-        await setDoc(examsRef, examsUpdates, { merge: true });
-      }
-
-      if (Object.keys(regStrengthUpdates).length > 0) {
-        await setDoc(regStrengthRef, regStrengthUpdates, { merge: true });
-      }
-
-      if (Object.keys(letStrengthUpdates).length > 0) {
-        await setDoc(letStrengthRef, letStrengthUpdates, { merge: true });
-      }
-
-      if (Object.keys(dropUpdates).length > 0) {
-        await setDoc(dropRef, dropUpdates, { merge: true });
-      }
-
-      if (Object.keys(rejoinUpdates).length > 0) {
-        await setDoc(rejoinRef, rejoinUpdates, { merge: true });
-      }
-
-      if (Object.keys(startUpdates).length > 0) {
-        await setDoc(startRef, startUpdates, { merge: true });
-      }
+      await setDoc(examsRef, examsUpdates, { merge: true });
+      await setDoc(regStrengthRef, regStrengthUpdates, { merge: true });
+      await setDoc(letStrengthRef, letStrengthUpdates, { merge: true });
+      await setDoc(dropRef, dropUpdates, { merge: true });
+      await setDoc(rejoinRef, rejoinUpdates, { merge: true });
+      await setDoc(startRef, startUpdates, { merge: true });
 
       showAlert("success", "Batches Updated Successfully !");
     } catch (error) {

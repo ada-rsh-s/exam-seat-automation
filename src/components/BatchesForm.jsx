@@ -63,7 +63,7 @@ const BatchesForm = () => {
 
   const submitForm = async () => {
     depts.forEach((dept) => {
-      dept.start = 0;
+      dept.start = 1;
     });
     try {
       await batchesForm(depts);

@@ -99,7 +99,6 @@ const BatchesTable = () => {
       selector: (row) =>
         editingKey == row.deptName ? (
           <Form.Item
-            initialValue={editData.start}
             rules={[
               {
                 required: true,
@@ -109,11 +108,11 @@ const BatchesTable = () => {
           >
             <InputNumber
               size="large"
-              min={0}
+              min={1}
               max={row.regStrength}
+              value={editData.start}
               placeholder="Staring Roll No"
               style={{ width: "100%" }}
-              value={editData.start}
               onChange={(value) => handleChange(value, "start")}
             />
           </Form.Item>
@@ -129,7 +128,6 @@ const BatchesTable = () => {
       selector: (row) =>
         editingKey == row.deptName ? (
           <Form.Item
-            initialValue={editData.regStrength}
             rules={[
               {
                 required: true,
@@ -139,11 +137,11 @@ const BatchesTable = () => {
           >
             <InputNumber
               size="large"
-              min={1}
+              min={0}
               max={500}
+              value={editData.regStrength}
               placeholder="Regular Strength"
               style={{ width: "100%" }}
-              value={editData.regStrength}
               onChange={(value) => handleChange(value, "regStrength")}
             />
           </Form.Item>
@@ -159,7 +157,6 @@ const BatchesTable = () => {
       selector: (row) =>
         editingKey == row.deptName ? (
           <Form.Item
-            initialValue={editData.letStrength}
             rules={[
               {
                 required: true,
@@ -169,11 +166,11 @@ const BatchesTable = () => {
           >
             <InputNumber
               size="large"
-              min={1}
+              min={0}
               max={500}
               placeholder="Let Strength"
-              style={{ width: "100%" }}
               value={editData.letStrength}
+              style={{ width: "100%" }}
               onChange={(value) => handleChange(value, "letStrength")}
             />
           </Form.Item>
@@ -189,19 +186,19 @@ const BatchesTable = () => {
       selector: (row) =>
         editingKey == row.deptName ? (
           <Form.Item
-            initialValue={editData.drop}
             rules={[
               {
                 required: true,
                 message: "Please add Dropped students",
+                
               },
             ]}
           >
             <Select
               style={{ minWidth: "200px" }}
               mode="tags"
-              placeholder="Add Dropped students"
               value={editData.drop}
+              placeholder="Add Dropped students"
               onChange={(value) => handleChange(value, "drop")}
             />
           </Form.Item>
@@ -216,19 +213,18 @@ const BatchesTable = () => {
       selector: (row) =>
         editingKey == row.deptName ? (
           <Form.Item
-            initialValue={editData.rejoin}
             rules={[
               {
                 required: true,
                 message: "Please add Rejoined students",
-              },
+              }
             ]}
           >
             <Select
               mode="tags"
+              value={editData.rejoin}
               style={{ minWidth: "200px" }}
               placeholder="Add Rejoined students"
-              value={editData.rejoin}
               onChange={(value) => handleChange(value, "rejoin")}
             />
           </Form.Item>

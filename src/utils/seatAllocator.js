@@ -691,6 +691,9 @@ export const test = (
   savedClasses = [],
   savedData = []
 ) => {
+
+  
+
   let sup = {};
 
   for (let key of Object.keys(exams)) {
@@ -980,7 +983,7 @@ export const test = (
       deptList.forEach((dept, index) => {
         if (subList[index].includes(exam)) {
           const num = deptStrength[dept];
-          if (!deptSet.has(dept)) {
+          if (!deptSet.has(dept) && num!=undefined) {
             subArray.push([dept, num]);
             deptSet.add(dept);
           }
@@ -998,14 +1001,19 @@ export const test = (
       }
     });
 
+    console.log(resultArray);
+    
     optimizer(arraySorter(resultArray), 2);
     optimizer(arraySorter(resultArray), 1);
+
     return data;
   }
 
   if (savedData.length === 0)
     data = dataArrayMaker(examToday, exams, deptStrength);
   else data = savedData;
+
+
 
   let evenBenchIndex = 0;
   let oddBenchIndex = 1;
@@ -1016,6 +1024,7 @@ export const test = (
   let supRollNum = [];
 
   function formatToThreeDigits(number) {
+    
     return number.toString().padStart(3, "0");
   }
 
@@ -1063,7 +1072,7 @@ export const test = (
             if (rejoinLength === 0) {
               num = n;
             }
-          } else {
+          } else {            
             let sNum = formatToThreeDigits(num);
             while (
               drop.includes("JEC" + sub.concat(sNum)) ||
@@ -1147,7 +1156,7 @@ export const test = (
 
   if (savedClasses.length === 0) {
     let subjectAllotedNum = 0;
-    for (const [dept, num] of data) {
+    for (const [dept, num] of data) {      
       dept, num;
       if (subjectAllotedNum % 2 === 0) {
         seatArr(num, dept, 0);

@@ -125,6 +125,8 @@ const AppProvider = ({ children }) => {
       addUserToLocalStorage({ user });
       showAlert("success", "Login Successful!");
     } catch (error) {
+      console.log(error.message);
+      
       const errormsg = error.message.split("/")[1];
       dispatch({
         type: SETUP_USER_ERROR,

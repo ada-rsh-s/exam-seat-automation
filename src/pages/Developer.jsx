@@ -18,8 +18,8 @@ const slidesData = [
     name: "Abhiram V",
     position: "Back-End Developer",
     image: "/img/abhiram.jpg",
-    linkedin: "#",
-    github: "#",
+    linkedin: "https://www.linkedin.com/in/abhiram-vakil",
+    github: "https://github.com/Abhiram-Vakil",
   },
   {
     name: "Alan Jose Santo",
@@ -69,7 +69,7 @@ const Developer = () => {
         <h2 className="developer-heading">MASTERS OF THE BUILD</h2>
 
         <Swiper
-          modules={[Pagination, Autoplay]}
+          modules={[Autoplay]}
           loop={true}
           autoplay={{
             delay: 2000,
@@ -79,7 +79,6 @@ const Developer = () => {
           slidesPerView="auto"
           speed={800}
           slideToClickedSlide={true}
-          pagination={{ clickable: true }}
           initialSlide={0}
           breakpoints={{
             320: { spaceBetween: 40 },

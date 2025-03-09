@@ -205,20 +205,6 @@ main {
   transition-delay: 0.5s;
 }
 
-/* Pagination */
-.swiper-pagination-bullet {
-  width: 16px;
-  height: 16px;
-  background-color: var(--primary-clr);
-  border-radius: 50%;
-}
-
-.swiper-pagination-bullet-active {
-  width: 32px;
-  border-radius: 14px;
-  background-color: var(--accent-clr);
-  transition: all 0.8s ease-in-out;
-}
 
 /* Media Queries */
 @media (max-width: 800px) {

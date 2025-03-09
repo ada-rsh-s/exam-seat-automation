@@ -12,7 +12,8 @@ const ExamHalls = () => {
   };
 
   return (
-    <>
+        <div className="heightcontainer">
+
       <ExamHallTable />
 
       <FloatButton
@@ -28,7 +29,7 @@ const ExamHalls = () => {
         }
         onClick={handleFloatButtonClick}
       />
-    </>
+    </div>
   );
 };
 

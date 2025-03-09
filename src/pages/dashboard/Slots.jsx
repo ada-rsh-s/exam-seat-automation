@@ -3,8 +3,10 @@ import SlotsTable from '../../components/SlotsTable'
 
 const Slots = () => {
   return (
-    <SlotsTable/>
-  )
+    <div className="heightcontainer">
+      <SlotsTable />
+    </div>
+  );
 }
 
 export default Slots

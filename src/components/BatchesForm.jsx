@@ -104,7 +104,7 @@ const BatchesForm = () => {
   }, [depts, selectedYear]);
 
   return (
-    <>
+    <div className="heightcontainer">
       <Form
         className="batches-form"
         form={form}
@@ -302,7 +302,7 @@ const BatchesForm = () => {
           </Popconfirm>
         </Form.Item>
       </Form>
-    </>
+    </div>
   );
 };
 

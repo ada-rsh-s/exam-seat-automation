@@ -13,7 +13,7 @@ const Batches = () => {
   };
 
   return (
-    <>
+    <div className="heightcontainer">
       <BatchesTable />
 
       <FloatButton
@@ -33,7 +33,7 @@ const Batches = () => {
         }
         onClick={handleFloatButtonClick}
       />
-    </>
+    </div>
   );
 };
 

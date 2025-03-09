@@ -12,7 +12,7 @@ const Subjects = () => {
   };
 
   return (
-    <>
+    <div className="heightcontainer">
       <SubjectsTable />
 
       <FloatButton
@@ -32,7 +32,7 @@ const Subjects = () => {
         }
         onClick={handleFloatButtonClick}
       />
-    </>
+    </div>
   );
 };
 

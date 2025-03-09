@@ -12,6 +12,7 @@ import PrintData from "./pages/dashboard/PrintData";
 import Sharedlayout from "./pages/dashboard/SharedLayout";
 import Slots from "./pages/dashboard/Slots";
 import Subjects from "./pages/dashboard/Subjects";
+import Developer from "./pages/Developer";
 
 const App = () => {
   return (
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/print" element={<PrintData />} />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/developer-credits" element={<Developer/>} />
         <Route path="*" element={<Fallback />} />
       </Routes>
     </BrowserRouter>

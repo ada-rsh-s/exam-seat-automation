@@ -1,3 +1,6 @@
+.heightcontainer{
+  min-height: 70vh;
+}
 .tdhd {
   color: var(--Curious-Blue-900, #0b4d6f);
   font-family: Poppins;
@@ -25,6 +28,7 @@
   padding-top: 30px;
   margin: 0 auto;
 }
+
 .tcard h3 {
   color: var(--Curious-Blue-950, #07314a);
   font-family: Poppins;

@@ -9,7 +9,7 @@ function Home() {
   const { deptView, isLoading } = useAppContext();
    
   return (
-    <>
+    <div className="heightcontainer">
       <div className="tdye">
         <TodayExam />
         <Spin
@@ -33,7 +33,7 @@ function Home() {
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

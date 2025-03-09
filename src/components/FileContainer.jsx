@@ -68,7 +68,7 @@ const FileContainer = () => {
   };
 
   return (
-    <>
+    <div className="heightcontainer">
       <div className="file-form">
         {destination === "subjectsform" ? (
           <h3>Add Subjects</h3>
@@ -130,7 +130,7 @@ const FileContainer = () => {
           />
         )}
       </div>
-    </>
+    </div>
   );
 };
 

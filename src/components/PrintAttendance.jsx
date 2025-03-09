@@ -60,10 +60,10 @@ const PrintAttendance = () => {
             </th>
           </tr>
           <tr>
-            <th width="300" className="header-column">
+            <th width="250" className="header-column">
               Sl No
             </th>
-            <th className="header-column">Register Number</th>
+            <th width="200" className="header-column">Register Number</th>
             {dateArray.map((date) => (
               <th key={date} className="header-column">
                 {date}
@@ -86,19 +86,29 @@ const PrintAttendance = () => {
             <td>
               <strong>Register number of absentees</strong>
             </td>
-            <td colSpan={dateArray.length + 1}></td>
+            <td ></td>
+
+            {dateArray.map(() => (
+              <td></td>
+            ))}
           </tr>
           <tr key="facname">
             <td>
               <strong>Name of faculty</strong>
             </td>
-            <td colSpan={dateArray.length + 1}></td>
+            <td> </td>
+            {dateArray.map(() => (
+              <td></td>
+            ))}{" "}
           </tr>
           <tr key="facsign">
             <td>
               <strong>Signature of faculty</strong>
             </td>
-            <td colSpan={dateArray.length + 1}></td>
+            <td> </td>
+            {dateArray.map(() => (
+              <td></td>
+            ))}{" "}
           </tr>
         </tbody>
       </table>

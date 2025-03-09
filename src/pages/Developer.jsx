@@ -58,7 +58,8 @@ const Developer = () => {
   useEffect(() => {
     if (swiperRef.current) {
       swiperRef.current.update(); 
-      swiperRef.current.slideToLoop(0); 
+      swiperRef.current.slideToLoop(0);
+      
     }
   }, []);
 
@@ -70,6 +71,10 @@ const Developer = () => {
         <Swiper
           modules={[Pagination, Autoplay]}
           loop={true}
+          autoplay={{
+            delay: 2000,
+            disableOnInteraction: false,
+          }}
           centeredSlides={true}
           slidesPerView="auto"
           speed={800}

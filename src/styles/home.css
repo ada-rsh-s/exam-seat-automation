@@ -1,5 +1,5 @@
 .heightcontainer{
-  min-height: 70vh;
+  min-height: 63vh;
 }
 .tdhd {
   color: var(--Curious-Blue-900, #0b4d6f);
@@ -7,7 +7,7 @@
   font-size: 32px;
   font-style: normal;
   font-weight: 500;
-  line-height: 24px; /* 75% */
+  line-height: 24px; 
   margin: 0;
   margin-bottom: 10px;
   padding-left: 15px;

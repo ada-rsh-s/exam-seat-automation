@@ -1,10 +1,11 @@
 .footer-container {
+  margin-top: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  background: #001529;
-  color: #e0f3fe;
+  background-color: #e4f0f8;
+  color: #07314a;
 }
 
 .footer-text {
@@ -12,17 +13,21 @@
 }
 
 .footer-link {
-  color: #e0f3fe;
+  color: #07314a;
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-weight: bold;
+      font-weight: 600;
+
   transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .footer-link:hover {
-  color: #00bcd4;
+  color: #07314a;
+      font-weight: 700;
+
+
   transform: translateY(-2px);
 }
 

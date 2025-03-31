@@ -65,6 +65,7 @@ const LoginForm = () => {
     <>
       <div className="txtb">
         {values.isMember ? <h3>Login</h3> : <h3>Register</h3>}
+       <br />
         <Form
           form={form}
           name="horizontal_login"

@@ -1,3 +1,681 @@
+import _ from "lodash";
+export const test = (
+  classCapacity,
+  deptStrength,
+  letStrength,
+  exams,
+  drop,
+  rejoin,
+  examToday,
+  deptStart,
+  savedClasses = [],
+  savedData = []
+) => {
+
+  
+
+  let sup = {};
+
+  for (let key of Object.keys(exams)) {
+    exams[key] = exams[key].filter((exam) => examToday.includes(exam));
+  }
+
+  Object.keys(sup).forEach((key) => {
+    exams[`SUP_${key}`] = [key];
+  });
+
+  Object.keys(sup).forEach((key) => {
+    deptStrength[`SUP_${key}`] = sup[key].length;
+  });
+
+  function mergeExamSchedules(exams) {
+    let updatedExams = {};
+    for (let key in exams) {
+      let mergedExams = new Set(exams[key]);
+      for (let otherKey in exams) {
+        if (key !== otherKey) {
+          exams[key].forEach((exam) => {
+            if (exams[otherKey].includes(exam)) {
+              exams[otherKey].forEach((otherExam) =>
+                mergedExams.add(otherExam)
+              );
+            }
+          });
+        }
+      }
+      updatedExams[key] = Array.from(mergedExams);
+    }
+    if (_.isEqual(updatedExams, exams) == false)
+      return mergeExamSchedules(updatedExams);
+    else return updatedExams;
+  }
+
+  exams = mergeExamSchedules(exams, sup);
+
+  let classes = [],
+    lastIndex = 0,
+    data = [],
+    supIndex = 0;
+
+  const updateDeptStrength = (deptStrength, letStrength) => {
+    const updatedDeptStrength = {};
+    for (const dept in deptStrength) {
+      const rejoinStrength = rejoin[dept] ? rejoin[dept].length : 0;
+      updatedDeptStrength[dept] =
+        deptStrength[dept] + (letStrength[dept] || 0) + rejoinStrength;
+    }
+    return updatedDeptStrength;
+  };
+
+  deptStrength = updateDeptStrength(deptStrength, letStrength);
+
+  classCapacity = Object.entries(classCapacity)
+    .sort(([keyA, a], [keyB, b]) => {
+      const strengthA = a[0] * a[1]; // Calculate strength for entry A
+      const strengthB = b[0] * b[1]; // Calculate strength for entry B
+
+      if (strengthA === strengthB) {
+        return keyA.localeCompare(keyB); // If strengths are equal, sort by key
+      }
+
+      return strengthB - strengthA; // Sort by strength (descending)
+    })
+    .reduce((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+
+  let classNames = Object.keys(classCapacity);
+
+  for (let i = 0; i < classNames.length; i++) {
+    const [rows, cols] = classCapacity[classNames[i]];
+    classes[i] = Array(rows)
+      .fill()
+      .map(() => Array(cols).fill(0));
+  }
+
+  //to calculate strength of odd/even indices
+  function strengthCalculator(n, data) {
+    let strength = 0;
+
+    for (let i = n; i < data.length; i += 2) {
+      strength += data[i][1];
+    }
+
+    return strength;
+  }
+
+  //for efficient grouping of departments
+  function optimizer(resultArray, n) {
+    for (const key in resultArray) {
+      const subArray = resultArray[key];
+      if (subArray.length > n && n == 1) {
+        continue;
+      }
+      const evenStrength = strengthCalculator(0, data);
+      const oddStrength = strengthCalculator(1, data);
+      if (subArray.length >= n) {
+        let sub;
+        if (n === 1) {
+          sub = [subArray[0]];
+        } else {
+          sub = [subArray[0], ["DUM", 0], subArray[1]];
+          if (subArray.length > n) {
+            for (let j = 2; j < subArray.length; j++) {
+              sub = sub.concat([["DUM", 0], subArray[j]]);
+            }
+          }
+        }
+        if (evenStrength > oddStrength) {
+          if (lastIndex % 2 !== 0) {
+            data = data.concat(sub);
+            lastIndex++;
+          } else {
+            data = data.concat([["DUM", 0]], sub);
+          }
+        } else {
+          if (lastIndex % 2 === 0) {
+            data = data.concat(sub);
+            lastIndex++;
+          } else {
+            data = data.concat([["DUM", 0]], sub);
+          }
+        }
+      }
+    }
+  }
+
+  //sorting of the resultArray
+  function arrayStrength(array) {
+    let total = 0;
+    for (let i = 0; i < array[1].length; i++) {
+      total += array[1][i][1];
+    }
+    return total;
+  }
+
+  function arraySorter(resultArray) {
+    let resultArrayEntries = Object.entries(resultArray);
+
+    for (let i = 1; i < resultArrayEntries.length; i++) {
+      let key = resultArrayEntries[i];
+      let j = i - 1;
+      while (
+        j >= 0 &&
+        arrayStrength(resultArrayEntries[j]) < arrayStrength(key)
+      ) {
+        resultArrayEntries[j + 1] = resultArrayEntries[j];
+        j = j - 1;
+      }
+      resultArrayEntries[j + 1] = key;
+    }
+    const finalResultArray = Object.fromEntries(resultArrayEntries);
+
+    return finalResultArray;
+  }
+
+  function dataArrayMaker(examToday, exams, deptStrength) {
+    const resultArray = {};
+
+    const deptList = Object.keys(exams);
+    const subList = Object.values(exams);
+
+    const deptSet = new Set();
+
+    examToday.forEach((exam) => {
+      let subArray = [];
+      deptList.forEach((dept, index) => {
+        if (subList[index].includes(exam)) {
+          const num = deptStrength[dept];
+          if (!deptSet.has(dept) && num!=undefined) {
+            subArray.push([dept, num]);
+            deptSet.add(dept);
+          }
+        }
+      });
+
+      if (subArray.length > 0) {
+        resultArray[exam] = subArray;
+      }
+    });
+
+    Object.keys(resultArray).forEach((key) => {
+      if (resultArray[key].length === 0) {
+        delete resultArray[key];
+      }
+    });
+
+    console.log(resultArray);
+    
+    optimizer(arraySorter(resultArray), 2);
+    optimizer(arraySorter(resultArray), 1);
+
+    return data;
+  }
+
+  if (savedData.length === 0)
+    data = dataArrayMaker(examToday, exams, deptStrength);
+  else data = savedData;
+
+
+
+  let evenBenchIndex = 0;
+  let oddBenchIndex = 1;
+  let evenRowIndex = 0;
+  let oddRowIndex = 0;
+  let evenClassIndex = 0;
+  let oddClassIndex = 0;
+
+  function formatToThreeDigits(number) {
+    
+    return number.toString().padStart(3, "0");
+  }
+
+const seatArr = (totalStudents, subject, benchStart) => {
+  // Base case: return if no students to assign
+  if (totalStudents === 0) return;
+
+  // Initialize variables
+  let currentNumber = deptStart[subject];
+  const isEvenBench = benchStart % 2 === 0;
+  let benchIndex = isEvenBench ? evenBenchIndex : oddBenchIndex;
+  let rowIndex = isEvenBench ? evenRowIndex : oddRowIndex;
+  let classIndex = isEvenBench ? evenClassIndex : oddClassIndex;
+
+  // Handle supplementary subjects
+  let supplementaryRollNumbers;
+  if (subject.includes("SUP")) {
+    const supplementarySubject = subject.substring(4);
+    supplementaryRollNumbers = sup[supplementarySubject];
+  }
+
+  // Handle rejoin students
+  const rejoinDepartments = Object.keys(rejoin);
+  let rejoinStudentsList;
+  let remainingRejoinStudents = 0;
+  let rejoinStudentIndex = 0;
+  let remainingRegularStudents;
+
+  if (rejoinDepartments.includes(subject)) {
+    rejoinStudentsList = rejoin[subject];
+    remainingRejoinStudents = rejoinStudentsList.length;
+    remainingRegularStudents = totalStudents - remainingRejoinStudents;
+  }
+
+  // Iterate through classes, benches, and rows
+  for (let classIdx = classIndex; classIdx < classes.length; classIdx++) {
+    const currentClass = classes[classIdx];
+
+    for (
+      let benchIdx = benchIndex;
+      benchIdx < currentClass[0].length;
+      benchIdx += 2
+    ) {
+      for (let rowIdx = rowIndex; rowIdx < currentClass.length; rowIdx++) {
+        if (subject.includes("SUP")) {
+          currentClass[rowIdx][benchIdx] = supplementaryRollNumbers[supIndex];
+          supIndex++;
+          if (totalStudents === supIndex) {
+            supIndex = 0;
+            currentNumber = totalStudents;
+          }
+        } else if (
+          rejoinDepartments.includes(subject) &&
+          totalStudents - (remainingRejoinStudents - 1) === currentNumber
+        ) {
+          currentClass[rowIdx][benchIdx] =
+            rejoinStudentsList[rejoinStudentIndex];
+          rejoinStudentIndex++;
+          remainingRejoinStudents--;
+          if (remainingRejoinStudents === 0) {
+            currentNumber = totalStudents;
+          }
+        } else {
+          let formattedNumber = formatToThreeDigits(currentNumber);
+          while (
+            drop.includes("JEC" + subject.concat(formattedNumber)) ||
+            drop.includes("LJEC" + subject.concat(formattedNumber))
+          ) {
+            currentNumber++;
+            formattedNumber = formatToThreeDigits(currentNumber);
+          }
+
+          const departmentLimit =
+            deptStrength[subject] -
+            (letStrength[subject] + remainingRejoinStudents);
+          currentClass[rowIdx][benchIdx] =
+            currentNumber <= departmentLimit
+              ? "JEC" + subject.concat(formattedNumber)
+              : "LJEC" + subject.concat(formattedNumber);
+
+          if (currentNumber > totalStudents) {
+            currentNumber--;
+          }
+        }
+
+        // Check if all students are assigned
+        if (currentNumber === totalStudents) {
+          const [nextBenchEven, nextBenchOdd] =
+            currentClass[0].length % 2 === 0 ? [2, 1] : [1, 2];
+
+          // Handle even bench completion
+          if (rowIdx === currentClass.length - 1 && isEvenBench) {
+            evenRowIndex = 0;
+            evenBenchIndex = benchIdx + 2;
+
+            if (
+              currentClass[currentClass.length - 1][
+                currentClass[0].length - nextBenchEven
+              ] !== 0
+            ) {
+              evenClassIndex = classIdx + 1;
+              evenRowIndex = 0;
+              evenBenchIndex = 0;
+            } else {
+              evenClassIndex = classIdx;
+            }
+            return;
+          }
+
+          // Handle odd bench completion
+          if (rowIdx === currentClass.length - 1 && !isEvenBench) {
+            oddRowIndex = 0;
+            oddBenchIndex = benchIdx + 2;
+            if (
+              currentClass[currentClass.length - 1][
+                currentClass[0].length - nextBenchOdd
+              ] !== 0
+            ) {
+              oddClassIndex = classIdx + 1;
+              oddRowIndex = 0;
+              oddBenchIndex = 1;
+            } else {
+              oddClassIndex = classIdx;
+            }
+            return;
+          }
+
+          // Update indices for next iteration
+          if (isEvenBench) {
+            evenRowIndex = rowIdx + 1;
+            evenBenchIndex = benchIdx;
+            evenClassIndex = classIdx;
+          } else {
+            oddRowIndex = rowIdx + 1;
+            oddBenchIndex = benchIdx;
+            oddClassIndex = classIdx;
+          }
+          return;
+        }
+
+        // Reset indices when reaching end of rows
+        if (rowIdx === currentClass.length - 1) {
+          benchIndex = isEvenBench ? 0 : 1;
+          rowIndex = 0;
+        }
+        currentNumber++;
+      }
+    }
+  }
+};
+
+  if (savedClasses.length === 0) {
+    let subjectAllotedNum = 0;
+    for (const [dept, num] of data) {
+      dept, num;
+      if (subjectAllotedNum % 2 === 0) {
+        seatArr(num, dept, 0);
+      } else {
+        seatArr(num, dept, 1);
+      }
+      subjectAllotedNum++;
+    }
+  } else {
+    classes = savedClasses;
+  }
+
+  const consolidateItems = (items) => {
+    const groupedItems = {};
+
+    items.forEach((item) => {
+      if (item != 0) {
+        const [prefix, num] = item
+          .match(/^([A-Z]{3,4}\d{2}[A-Z]{2})(\d{3})$/)
+          .slice(1);
+        if (Object.values(rejoin).some((value) => value.includes(item))) {
+          const prefixrejoin = prefix + "R";
+          if (!groupedItems[prefixrejoin]) groupedItems[prefixrejoin] = [];
+          groupedItems[prefixrejoin].push(Number(num));
+        } else {
+          if (!groupedItems[prefix]) groupedItems[prefix] = [];
+          groupedItems[prefix].push(Number(num));
+        }
+      }
+    });
+
+    return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
+      nums.sort((a, b) => a - b);
+      let first, last;
+
+      const rejoinList = !/\d/.test(prefix.slice(-3));
+
+      if (rejoinList) {
+        first = `${prefix.slice(0, -1)}${formatToThreeDigits(nums[0])}`;
+        last = `${prefix.slice(0, -1)}${formatToThreeDigits(
+          nums[nums.length - 1]
+        )}`;
+      } else {
+        first = `${prefix}${formatToThreeDigits(nums[0])}`;
+        last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
+      }
+      return [first, last];
+    });
+  };
+
+  const calculateCounts = (items, sup) => {
+    const counts = [];
+
+    for (let i = 1; i < items.length; i += 2) {
+      const num1 = parseInt(items[i].slice(-3));
+      const num0 = parseInt(items[i - 1].slice(-3));
+      const match = items[i].match(/^L?JEC(\d{2})([A-Z]{2})\d{3}$/);
+      let dropCount = 0,
+        supCount = 0;
+      let flag = false;
+      const supArray = Object.values(sup).flat();
+
+      let result;
+      if (match) {
+        result = `${match[1]}${match[2]}`;
+        for (let j = num0; j < num1; j++) {
+          if (
+            drop.includes("JEC" + result + formatToThreeDigits(j)) ||
+            drop.includes("LJEC" + result + formatToThreeDigits(j))
+          ) {
+            flag = true;
+            dropCount++;
+          }
+          if (
+            supArray.includes("JEC" + result + formatToThreeDigits(j)) ||
+            supArray.includes("LJEC" + result + formatToThreeDigits(j))
+          ) {
+            supCount++;
+          }
+        }
+        if (!flag) {
+          if (supCount == 0) {
+            counts.push(num1 - num0 + 1);
+          } else {
+            counts.push(supCount + 1);
+            supCount = 0;
+          }
+        } else {
+          let inRejoinAndDrop = false;
+          const rejoinKey = Object.keys(rejoin).find((key) =>
+            rejoin[key].includes("JEC" + result + formatToThreeDigits(num1))
+          );
+          if (
+            rejoinKey &&
+            rejoin[rejoinKey].some((item) => drop.includes(item))
+          ) {
+            inRejoinAndDrop = true;
+          }
+
+          if (inRejoinAndDrop && rejoinKey !== result) {
+            counts.push(dropCount);
+          } else {
+            counts.push(num1 - num0 + 1 - dropCount);
+          }
+
+          dropCount = 0;
+        }
+      }
+    }
+
+    return counts;
+  };
+
+  const noticeBoardView = classes
+    .map((cls, idx) => {
+      const allItems = cls.flat();
+      const consolidatedItems = consolidateItems(allItems);
+      const counts = calculateCounts(consolidatedItems, sup);
+
+      if (consolidatedItems.length > 0) {
+        return {
+          class: classNames[idx],
+          items: consolidatedItems,
+          count: counts,
+          index: idx,
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  const extractDepartmentYear = (rollNo) => {
+    const match = rollNo.match(/L?JEC(\d{2})([A-Z]{2})/);
+    return match ? `${match[1]}${match[2]}` : null;
+  };
+
+  const organizeByDept = (data) => {
+    const deptMap = {};
+
+    data.forEach(({ class: room, items }) => {
+      items.forEach((rollNo) => {
+        let deptYear = extractDepartmentYear(rollNo);
+        if (!deptYear) return;
+
+        // Check if rollNo is in any keys of rejoin object
+        let rejoinKey = Object.keys(rejoin).find((key) =>
+          rejoin[key].includes(rollNo)
+        );
+        if (rejoinKey) {
+          deptYear = rejoinKey;
+        }
+
+        if (!deptMap[deptYear]) {
+          deptMap[deptYear] = [];
+        }
+
+        deptMap[deptYear].push({ room, rollNo });
+      });
+    });
+
+    const result = Object.keys(deptMap).map((deptYear) => {
+      const rooms = [];
+      const rollNums = [];
+
+      for (let i = 0; i < deptMap[deptYear].length; i += 2) {
+        const { room: room1, rollNo: rollNo1 } = deptMap[deptYear][i];
+        const { room: room2, rollNo: rollNo2 } = deptMap[deptYear][i + 1] || {};
+
+        rooms.push(room1);
+        rollNums.push(rollNo1, rollNo2);
+      }
+
+      const counts = calculateCounts(rollNums, sup);
+
+      return {
+        dept: deptYear,
+        rooms,
+        rollNums,
+        count: counts,
+      };
+    });
+
+    // Sort the results
+    result.sort((a, b) => {
+      const yearA = parseInt(a.dept.match(/\d+/)[0]);
+      const yearB = parseInt(b.dept.match(/\d+/)[0]);
+
+      const deptA = a.dept.match(/[A-Z]+/)[0];
+      const deptB = b.dept.match(/[A-Z]+/)[0];
+
+      if (yearA < yearB) return -1;
+      if (yearA > yearB) return 1;
+
+      if (deptA < deptB) return -1;
+      if (deptA > deptB) return 1;
+
+      return 0;
+    });
+
+    // Add continuous index based on count array length
+    let currentIndex = 0;
+    result.forEach((item) => {
+      item.indexes = [];
+      item.count.forEach(() => {
+        item.indexes.push(currentIndex);
+        currentIndex++;
+      });
+    });
+
+    return result;
+  };
+
+  const deptView = organizeByDept(noticeBoardView);
+
+  const classroomViewMaker = (data) => {
+    const numRows = data.length;
+    const numCols = data[0].length;
+
+    let aCounter = 1;
+    let bCounter = 1;
+
+    const updatedData = Array.from({ length: numRows }, () =>
+      Array(numCols * 2 - 1)
+    );
+
+    for (let col = 0; col < numCols; col++) {
+      for (let row = 0; row < numRows; row++) {
+        const labelPrefix = col % 2 === 0 ? "A" : "B";
+        const labelNumber = col % 2 === 0 ? aCounter++ : bCounter++;
+        const label = `${labelPrefix}${labelNumber}`;
+        updatedData[row][col * 2] = label;
+        updatedData[row][col * 2 + 1] = data[row][col];
+      }
+    }
+
+    return updatedData;
+  };
+
+  const attendanceSheet = (deptView) => {
+    const sortedClasses = classes.map((classGroup) => {
+      return classGroup.flat().sort();
+    });
+
+    const result = [];
+
+    deptView.forEach((dept) => {
+      dept.rooms.forEach((room) => {
+        let i = 1;
+        const classIndex = classNames.indexOf(room);
+
+        const classGroup = sortedClasses[classIndex]
+          .filter((item) => {
+            if (item === 0) return null;
+            return item.includes(dept.dept);
+          })
+          .concat(
+            sortedClasses[classIndex].filter((item) => {
+              if (item === 0) return null;
+              return rejoin[dept.dept] && rejoin[dept.dept].includes(item);
+            })
+          )
+          .map((item) => ({
+            slNo: i++,
+            deptRoom: dept.dept + room,
+            regNo: item,
+          }));
+
+        result.push(classGroup);
+      });
+    });
+
+    return result;
+  };
+
+  const attendanceView = attendanceSheet(deptView);
+
+  const classroomView = classes.map((cls) => {
+    return classroomViewMaker(cls);
+  });
+  console.log(classCapacity);
+
+  return [
+    noticeBoardView,
+    deptView,
+    classroomView,
+    attendanceView,
+    classNames,
+    classes,
+    data,
+  ];
+};
+
+
+
 // import _ from "lodash";
 // export const test = (
 //   classCapacity,
@@ -145,7 +823,7 @@
 //   let oddStrength = 0;
 
 //   function groupingAlgo(deptStrength) {
-//     prevIndex = -1;
+//     let prevIndex = -1;
 
 //     for (let key in deptStrength) {
 //       const index = groupedArray.findIndex((childArray) =>
@@ -179,7 +857,7 @@
 //     }
 //   }
 
-//   function dataArraymaker(oddGroup, evenGroup) {
+//   function dataArrayMaker(oddGroup, evenGroup) {
 //     let limit =
 //       evenGroup.length > oddGroup.length ? oddGroup.length : evenGroup.length;
 //     let i;
@@ -230,7 +908,7 @@
 //     if (n === 0) return;
 
 //     let divindex = 0;
-//     departmentWithDiv = deptDiv[sub];
+//     let departmentWithDiv = deptDiv[sub];
 
 //     let num = 1;
 
@@ -678,773 +1356,8 @@
 //     data,
 //   ];
 // };
-import _ from "lodash";
-export const test = (
-  classCapacity,
-  deptStrength,
-  letStrength,
-  exams,
-  drop,
-  rejoin,
-  examToday,
-  deptStart,
-  savedClasses = [],
-  savedData = []
-) => {
 
-  
 
-  let sup = {};
 
-  for (let key of Object.keys(exams)) {
-    exams[key] = exams[key].filter((exam) => examToday.includes(exam));
-  }
 
-  Object.keys(sup).forEach((key) => {
-    exams[`SUP_${key}`] = [key];
-  });
 
-  Object.keys(sup).forEach((key) => {
-    deptStrength[`SUP_${key}`] = sup[key].length;
-  });
-
-  function mergeExamSchedules(exams) {
-    let updatedExams = {};
-    for (let key in exams) {
-      let mergedExams = new Set(exams[key]);
-      for (let otherKey in exams) {
-        if (key !== otherKey) {
-          exams[key].forEach((exam) => {
-            if (exams[otherKey].includes(exam)) {
-              exams[otherKey].forEach((otherExam) =>
-                mergedExams.add(otherExam)
-              );
-            }
-          });
-        }
-      }
-      updatedExams[key] = Array.from(mergedExams);
-    }
-    if (_.isEqual(updatedExams, exams) == false)
-      return mergeExamSchedules(updatedExams);
-    else return updatedExams;
-  }
-
-  exams = mergeExamSchedules(exams, sup);
-
-  let classes = [],
-    lastIndex = 0,
-    data = [],
-    supIndex = 0;
-
-  const updateDeptStrength = (deptStrength, letStrength) => {
-    const updatedDeptStrength = {};
-    for (const dept in deptStrength) {
-      const rejoinStrength = rejoin[dept] ? rejoin[dept].length : 0;
-      updatedDeptStrength[dept] =
-        deptStrength[dept] + (letStrength[dept] || 0) + rejoinStrength;
-    }
-    return updatedDeptStrength;
-  };
-
-  deptStrength = updateDeptStrength(deptStrength, letStrength);
-
-  classCapacity = Object.entries(classCapacity)
-    .sort(([keyA, a], [keyB, b]) => {
-      const strengthA = a[0] * a[1]; // Calculate strength for entry A
-      const strengthB = b[0] * b[1]; // Calculate strength for entry B
-
-      if (strengthA === strengthB) {
-        return keyA.localeCompare(keyB); // If strengths are equal, sort by key
-      }
-
-      return strengthB - strengthA; // Sort by strength (descending)
-    })
-    .reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {});
-
-  let classNames = Object.keys(classCapacity);
-
-  for (let i = 0; i < classNames.length; i++) {
-    const [rows, cols] = classCapacity[classNames[i]];
-    classes[i] = Array(rows)
-      .fill()
-      .map(() => Array(cols).fill(0));
-  }
-
-  // Object.keys(exams).forEach((key) => {
-  //   if (Array.isArray(exams[key]) && exams[key].length === 0) {
-  //     delete exams[key];
-  //   }
-  // });
-
-  // Object.keys(deptStrength).forEach((key) => {
-  //   if (deptStrength[key] === 0) {
-  //     delete deptStrength[key];
-  //   }
-  // });
-
-  // function sortAndGroup(exams) {
-  //   const sortedEntries = Object.entries(deptStrength).sort(
-  //     ([, a], [, b]) => b - a
-  //   );
-
-  //   deptStrength = Object.fromEntries(sortedEntries);
-  //   const groups = {};
-
-  //   Object.entries(exams).forEach(([key, value]) => {
-  //     value = value.sort();
-
-  //     const groupKey = JSON.stringify(value);
-
-  //     if (!groups[groupKey]) {
-  //       groups[groupKey] = [];
-  //     }
-  //     groups[groupKey].push(key);
-  //   });
-
-  //   const Array = Object.values(groups);
-
-  //   return Array;
-  // }
-
-  // const groupedArray = sortAndGroup(exams);
-
-  // let evenGroup = [];
-  // let oddGroup = [];
-  // let evenStrength = 0;
-  // let oddStrength = 0;
-
-  // function groupingAlgo(deptStrength) {
-  //   let prevIndex = -1;
-
-  //   for (let key in deptStrength) {
-  //     const index = groupedArray.findIndex((childArray) =>
-  //       childArray.includes(key)
-  //     );
-
-  //     let value = deptStrength[key];
-
-  //     if (evenStrength > oddStrength) {
-  //       if (index == prevIndex) {
-  //         evenGroup.push([key, value]);
-  //         evenStrength += value;
-  //       } else {
-  //         oddGroup.push([key, value]);
-
-  //         oddStrength += value;
-  //         if (oddStrength > evenStrength) {
-  //           prevIndex = index;
-  //         }
-  //       }
-  //     } else {
-  //       if (index == prevIndex) {
-  //         oddGroup.push([key, value]);
-  //         oddStrength += value;
-  //       } else {
-  //         evenGroup.push([key, value]);
-  //         evenStrength += value;
-  //         if (oddStrength < evenStrength) {
-  //           prevIndex = index;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  // function dataArraymaker(oddGroup, evenGroup) {
-  //   let limit =
-  //     evenGroup.length > oddGroup.length ? oddGroup.length : evenGroup.length;
-  //   let i;
-  //   let index = 0;
-  //   for (i = 0; i < limit; i++) {
-  //     data[index] = evenGroup[i];
-  //     index++;
-  //     data[index] = oddGroup[i];
-  //     index++;
-  //   }
-  //   if (evenGroup.length > oddStrength.length) {
-  //     for (let j = i; j < evenGroup.length; j++) {
-  //       data[index] = evenGroup[i];
-  //       index++;
-  //       data[index] = ["DUM", 0];
-  //       index++;
-  //     }
-  //   } else {
-  //     for (let j = i; j < oddGroup.length; j++) {
-  //       data[index] = ["DUM", 0];
-  //       index++;
-  //       data[index] = oddGroup[i];
-  //       index++;
-  //     }
-  //   }
-  //   return data;
-  // }
-
-  // groupingAlgo(deptStrength);
-
-  // data = dataArraymaker(oddGroup, evenGroup);
-
-  // if (savedData.length === 0) data = dataArraymaker(oddGroup, evenGroup);
-  // else data = savedData;
-
-  //to calculate strength of odd/even indices
-  function strengthCalculator(n, data) {
-    let strength = 0;
-
-    for (let i = n; i < data.length; i += 2) {
-      strength += data[i][1];
-    }
-
-    return strength;
-  }
-
-  //for efficient grouping of departments
-  function optimizer(resultArray, n) {
-    for (const key in resultArray) {
-      const subArray = resultArray[key];
-      if (subArray.length > n && n == 1) {
-        continue;
-      }
-      const evenStrength = strengthCalculator(0, data);
-      const oddStrength = strengthCalculator(1, data);
-      if (subArray.length >= n) {
-        let sub;
-        if (n === 1) {
-          sub = [subArray[0]];
-        } else {
-          sub = [subArray[0], ["DUM", 0], subArray[1]];
-          if (subArray.length > n) {
-            for (let j = 2; j < subArray.length; j++) {
-              sub = sub.concat([["DUM", 0], subArray[j]]);
-            }
-          }
-        }
-        if (evenStrength > oddStrength) {
-          if (lastIndex % 2 !== 0) {
-            data = data.concat(sub);
-            lastIndex++;
-          } else {
-            data = data.concat([["DUM", 0]], sub);
-          }
-        } else {
-          if (lastIndex % 2 === 0) {
-            data = data.concat(sub);
-            lastIndex++;
-          } else {
-            data = data.concat([["DUM", 0]], sub);
-          }
-        }
-      }
-    }
-  }
-
-  //sorting of the resultArray
-  function arrayStrength(array) {
-    let total = 0;
-    for (let i = 0; i < array[1].length; i++) {
-      total += array[1][i][1];
-    }
-    return total;
-  }
-
-  function arraySorter(resultArray) {
-    let resultArrayEntries = Object.entries(resultArray);
-
-    for (let i = 1; i < resultArrayEntries.length; i++) {
-      let key = resultArrayEntries[i];
-      let j = i - 1;
-      while (
-        j >= 0 &&
-        arrayStrength(resultArrayEntries[j]) < arrayStrength(key)
-      ) {
-        resultArrayEntries[j + 1] = resultArrayEntries[j];
-        j = j - 1;
-      }
-      resultArrayEntries[j + 1] = key;
-    }
-    const finalResultArray = Object.fromEntries(resultArrayEntries);
-
-    return finalResultArray;
-  }
-
-  function dataArrayMaker(examToday, exams, deptStrength) {
-    const resultArray = {};
-
-    const deptList = Object.keys(exams);
-    const subList = Object.values(exams);
-
-    const deptSet = new Set();
-
-    examToday.forEach((exam) => {
-      let subArray = [];
-      deptList.forEach((dept, index) => {
-        if (subList[index].includes(exam)) {
-          const num = deptStrength[dept];
-          if (!deptSet.has(dept) && num!=undefined) {
-            subArray.push([dept, num]);
-            deptSet.add(dept);
-          }
-        }
-      });
-
-      if (subArray.length > 0) {
-        resultArray[exam] = subArray;
-      }
-    });
-
-    Object.keys(resultArray).forEach((key) => {
-      if (resultArray[key].length === 0) {
-        delete resultArray[key];
-      }
-    });
-
-    console.log(resultArray);
-    
-    optimizer(arraySorter(resultArray), 2);
-    optimizer(arraySorter(resultArray), 1);
-
-    return data;
-  }
-
-  if (savedData.length === 0)
-    data = dataArrayMaker(examToday, exams, deptStrength);
-  else data = savedData;
-
-
-
-  let evenBenchIndex = 0;
-  let oddBenchIndex = 1;
-  let evenRowIndex = 0;
-  let oddRowIndex = 0;
-  let evenClassIndex = 0;
-  let oddClassIndex = 0;
-  let supRollNum = [];
-
-  function formatToThreeDigits(number) {
-    
-    return number.toString().padStart(3, "0");
-  }
-
-  const seatArr = (n, sub, b1) => {
-    if (n === 0) return;
-    let num;
-    num = deptStart[sub];
-    let benchIndex = b1 % 2 === 0 ? evenBenchIndex : oddBenchIndex;
-    let rowIndex = b1 % 2 === 0 ? evenRowIndex : oddRowIndex;
-    let classIndex = b1 % 2 === 0 ? evenClassIndex : oddClassIndex;
-    if (sub.includes("SUP")) {
-      const supSub = sub.substring(4);
-      supRollNum = sup[supSub];
-    }
-    const rejoinDept = Object.keys(rejoin);
-    let rejoinLength = 0,
-      rejoinIndex = 0;
-
-    let rejoinList;
-    let rejoinStr;
-    if (rejoinDept.includes(sub)) {
-      rejoinList = rejoin[sub];
-      rejoinLength = rejoinList.length;
-      rejoinStr = n - rejoinLength;
-    }
-    for (let Class = classIndex; Class < classes.length; Class++) {
-      const currentClass = classes[Class];
-      for (let j = benchIndex; j < currentClass[0].length; j += 2) {
-        for (let i = rowIndex; i < currentClass.length; i++) {
-          let flag = true;
-          if (sub.includes("SUP")) {
-            currentClass[i][j] = supRollNum[supIndex];
-            supIndex++;
-            if (n === supIndex) {
-              supIndex = 0;
-              num = n;
-            }
-          } else if (
-            rejoinDept.includes(sub) &&
-            n - (rejoinLength - 1) === num
-          ) {
-            currentClass[i][j] = rejoinList[rejoinIndex];
-            rejoinIndex++;
-            rejoinLength--;
-            if (rejoinLength === 0) {
-              num = n;
-            }
-          } else {            
-            let sNum = formatToThreeDigits(num);
-            while (
-              drop.includes("JEC" + sub.concat(sNum)) ||
-              drop.includes("LJEC" + sub.concat(sNum))
-            ) {
-              num++;
-              sNum = formatToThreeDigits(num);
-            }
-            if (num <= deptStrength[sub] - (letStrength[sub] + rejoinLength)) {
-              currentClass[i][j] = "JEC" + sub.concat(sNum);
-            } else {
-              currentClass[i][j] = "LJEC" + sub.concat(sNum);
-            }
-            if (num > n) {
-              num--;
-            }
-          }
-          if (num === n) {
-            let n1, n2;
-            if (currentClass[0].length % 2 === 0) {
-              n1 = 2;
-              n2 = 1;
-            } else {
-              n1 = 1;
-              n2 = 2;
-            }
-            if (i === currentClass.length - 1 && b1 % 2 === 0) {
-              evenRowIndex = 0;
-              evenBenchIndex = j + 2;
-
-              if (
-                currentClass[currentClass.length - 1][
-                  currentClass[0].length - n1
-                ] !== 0
-              ) {
-                evenClassIndex = Class + 1;
-                evenRowIndex = 0;
-                evenBenchIndex = 0;
-              } else {
-                evenClassIndex = Class;
-              }
-              return;
-            }
-            if (i === currentClass.length - 1 && b1 % 2 !== 0) {
-              oddRowIndex = 0;
-              oddBenchIndex = j + 2;
-              if (
-                currentClass[currentClass.length - 1][
-                  currentClass[0].length - n2
-                ] !== 0
-              ) {
-                oddClassIndex = Class + 1;
-                oddRowIndex = 0;
-                oddBenchIndex = 1;
-              } else {
-                oddClassIndex = Class;
-              }
-              return;
-            }
-            if (b1 % 2 === 0) {
-              evenRowIndex = i + 1;
-              evenBenchIndex = j;
-              evenClassIndex = Class;
-            } else {
-              oddRowIndex = i + 1;
-              oddBenchIndex = j;
-              oddClassIndex = Class;
-            }
-            return;
-          }
-
-          if (i === currentClass.length - 1) {
-            benchIndex = b1 % 2 === 0 ? 0 : 1;
-            rowIndex = 0;
-          }
-          num++;
-        }
-      }
-    }
-  };
-
-  if (savedClasses.length === 0) {
-    let subjectAllotedNum = 0;
-    for (const [dept, num] of data) {      
-      dept, num;
-      if (subjectAllotedNum % 2 === 0) {
-        seatArr(num, dept, 0);
-      } else {
-        seatArr(num, dept, 1);
-      }
-      subjectAllotedNum++;
-    }
-  } else {
-    classes = savedClasses;
-  }
-
-  const consolidateItems = (items) => {
-    const groupedItems = {};
-
-    items.forEach((item) => {
-      if (item != 0) {
-        const [prefix, num] = item
-          .match(/^([A-Z]{3,4}\d{2}[A-Z]{2})(\d{3})$/)
-          .slice(1);
-        if (Object.values(rejoin).some((value) => value.includes(item))) {
-          const prefixrejoin = prefix + "R";
-          if (!groupedItems[prefixrejoin]) groupedItems[prefixrejoin] = [];
-          groupedItems[prefixrejoin].push(Number(num));
-        } else {
-          if (!groupedItems[prefix]) groupedItems[prefix] = [];
-          groupedItems[prefix].push(Number(num));
-        }
-      }
-    });
-
-    return Object.entries(groupedItems).flatMap(([prefix, nums]) => {
-      nums.sort((a, b) => a - b);
-      let first, last;
-
-      const rejoinList = !/\d/.test(prefix.slice(-3));
-
-      if (rejoinList) {
-        first = `${prefix.slice(0, -1)}${formatToThreeDigits(nums[0])}`;
-        last = `${prefix.slice(0, -1)}${formatToThreeDigits(
-          nums[nums.length - 1]
-        )}`;
-      } else {
-        first = `${prefix}${formatToThreeDigits(nums[0])}`;
-        last = `${prefix}${formatToThreeDigits(nums[nums.length - 1])}`;
-      }
-      return [first, last];
-    });
-  };
-
-  const calculateCounts = (items, sup) => {
-    const counts = [];
-
-    for (let i = 1; i < items.length; i += 2) {
-      const num1 = parseInt(items[i].slice(-3));
-      const num0 = parseInt(items[i - 1].slice(-3));
-      const match = items[i].match(/^L?JEC(\d{2})([A-Z]{2})\d{3}$/);
-      let dropCount = 0,
-        supCount = 0;
-      let flag = false;
-      const supArray = Object.values(sup).flat();
-
-      let result;
-      if (match) {
-        result = `${match[1]}${match[2]}`;
-        for (let j = num0; j < num1; j++) {
-          if (
-            drop.includes("JEC" + result + formatToThreeDigits(j)) ||
-            drop.includes("LJEC" + result + formatToThreeDigits(j))
-          ) {
-            flag = true;
-            dropCount++;
-          }
-          if (
-            supArray.includes("JEC" + result + formatToThreeDigits(j)) ||
-            supArray.includes("LJEC" + result + formatToThreeDigits(j))
-          ) {
-            supCount++;
-          }
-        }
-        if (!flag) {
-          if (supCount == 0) {
-            counts.push(num1 - num0 + 1);
-          } else {
-            counts.push(supCount + 1);
-            supCount = 0;
-          }
-        } else {
-          let inRejoinAndDrop = false;
-          const rejoinKey = Object.keys(rejoin).find((key) =>
-            rejoin[key].includes("JEC" + result + formatToThreeDigits(num1))
-          );
-          if (
-            rejoinKey &&
-            rejoin[rejoinKey].some((item) => drop.includes(item))
-          ) {
-            inRejoinAndDrop = true;
-          }
-
-          if (inRejoinAndDrop && rejoinKey !== result) {
-            counts.push(dropCount);
-          } else {
-            counts.push(num1 - num0 + 1 - dropCount);
-          }
-
-          dropCount = 0;
-        }
-      }
-    }
-
-    return counts;
-  };
-
-  const noticeBoardView = classes
-    .map((cls, idx) => {
-      const allItems = cls.flat();
-      const consolidatedItems = consolidateItems(allItems);
-      const counts = calculateCounts(consolidatedItems, sup);
-
-      if (consolidatedItems.length > 0) {
-        return {
-          class: classNames[idx],
-          items: consolidatedItems,
-          count: counts,
-          index: idx,
-        };
-      }
-      return null;
-    })
-    .filter(Boolean);
-
-  const extractDepartmentYear = (rollNo) => {
-    const match = rollNo.match(/L?JEC(\d{2})([A-Z]{2})/);
-    return match ? `${match[1]}${match[2]}` : null;
-  };
-
-  const organizeByDept = (data) => {
-    const deptMap = {};
-
-    data.forEach(({ class: room, items }) => {
-      items.forEach((rollNo) => {
-        let deptYear = extractDepartmentYear(rollNo);
-        if (!deptYear) return;
-
-        // Check if rollNo is in any keys of rejoin object
-        let rejoinKey = Object.keys(rejoin).find((key) =>
-          rejoin[key].includes(rollNo)
-        );
-        if (rejoinKey) {
-          deptYear = rejoinKey;
-        }
-
-        if (!deptMap[deptYear]) {
-          deptMap[deptYear] = [];
-        }
-
-        deptMap[deptYear].push({ room, rollNo });
-      });
-    });
-
-    const result = Object.keys(deptMap).map((deptYear) => {
-      const rooms = [];
-      const rollNums = [];
-
-      for (let i = 0; i < deptMap[deptYear].length; i += 2) {
-        const { room: room1, rollNo: rollNo1 } = deptMap[deptYear][i];
-        const { room: room2, rollNo: rollNo2 } = deptMap[deptYear][i + 1] || {};
-
-        rooms.push(room1);
-        rollNums.push(rollNo1, rollNo2);
-      }
-
-      const counts = calculateCounts(rollNums, sup);
-
-      return {
-        dept: deptYear,
-        rooms,
-        rollNums,
-        count: counts,
-      };
-    });
-
-    // Sort the results
-    result.sort((a, b) => {
-      const yearA = parseInt(a.dept.match(/\d+/)[0]);
-      const yearB = parseInt(b.dept.match(/\d+/)[0]);
-
-      const deptA = a.dept.match(/[A-Z]+/)[0];
-      const deptB = b.dept.match(/[A-Z]+/)[0];
-
-      if (yearA < yearB) return -1;
-      if (yearA > yearB) return 1;
-
-      if (deptA < deptB) return -1;
-      if (deptA > deptB) return 1;
-
-      return 0;
-    });
-
-    // Add continuous index based on count array length
-    let currentIndex = 0;
-    result.forEach((item) => {
-      item.indexes = [];
-      item.count.forEach(() => {
-        item.indexes.push(currentIndex);
-        currentIndex++;
-      });
-    });
-
-    return result;
-  };
-
-  const deptView = organizeByDept(noticeBoardView);
-
-  const classroomViewMaker = (data) => {
-    const numRows = data.length;
-    const numCols = data[0].length;
-
-    let aCounter = 1;
-    let bCounter = 1;
-
-    const updatedData = Array.from({ length: numRows }, () =>
-      Array(numCols * 2 - 1)
-    );
-
-    for (let col = 0; col < numCols; col++) {
-      for (let row = 0; row < numRows; row++) {
-        const labelPrefix = col % 2 === 0 ? "A" : "B";
-        const labelNumber = col % 2 === 0 ? aCounter++ : bCounter++;
-        const label = `${labelPrefix}${labelNumber}`;
-        updatedData[row][col * 2] = label;
-        updatedData[row][col * 2 + 1] = data[row][col];
-      }
-    }
-
-    return updatedData;
-  };
-
-  const attendanceSheet = (deptView) => {
-    const sortedClasses = classes.map((classGroup) => {
-      return classGroup.flat().sort();
-    });
-
-    const result = [];
-
-    deptView.forEach((dept) => {
-      dept.rooms.forEach((room) => {
-        let i = 1;
-        const classIndex = classNames.indexOf(room);
-
-        const classGroup = sortedClasses[classIndex]
-          .filter((item) => {
-            if (item === 0) return null;
-            return item.includes(dept.dept);
-          })
-          .concat(
-            sortedClasses[classIndex].filter((item) => {
-              if (item === 0) return null;
-              return rejoin[dept.dept] && rejoin[dept.dept].includes(item);
-            })
-          )
-          .map((item) => ({
-            slNo: i++,
-            deptRoom: dept.dept + room,
-            regNo: item,
-          }));
-
-        result.push(classGroup);
-      });
-    });
-
-    return result;
-  };
-
-  const attendanceView = attendanceSheet(deptView);
-
-  const classroomView = classes.map((cls) => {
-    return classroomViewMaker(cls);
-  });
-  console.log(classCapacity);
-
-  return [
-    noticeBoardView,
-    deptView,
-    classroomView,
-    attendanceView,
-    classNames,
-    classes,
-    data,
-  ];
-};

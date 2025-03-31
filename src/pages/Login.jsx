@@ -1,13 +1,13 @@
 import LoginForm from "../components/LoginForm";
 import LoginVector from "../components/LoginVector";
 import "../styles/Login.css";
+import Footer from "./dashboard/Footer";
 
 const Login = () => {
   return (
     <>
-      <LoginVector/>
+      <LoginVector />
       <div className="login">
-        
         <div className="loginVector">
           <img srcSet="../loginVector.png" alt="" />
           <p>Organize exams with ease!</p>
@@ -15,6 +15,8 @@ const Login = () => {
         <div className="loginDivider"></div>
         <LoginForm />
       </div>
+      
+      <Footer />
     </>
   );
 };

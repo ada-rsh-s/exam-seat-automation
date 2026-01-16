@@ -265,7 +265,7 @@ const BatchesTable = () => {
 
   const disabledDate = (currentDate) => {
     const currentYear = dayjs().year();
-    return currentDate.year() < currentYear;
+    return currentDate.year() < currentYear-1;
   };
 
   const yearChanged = async (date) => {

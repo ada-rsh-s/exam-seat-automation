@@ -141,10 +141,10 @@ const LoginForm = () => {
           </Form.Item>
 
           <FlexContainer>
-            {values.isMember ? "Not a member yet ? " : "Already a member ? "}
+            {/* {values.isMember ? "Not a member yet ? " : "Already a member ? "}
             <p onClick={toggleMember} className="member-btn">
               {values.isMember ? "Register Now!" : "Login Here"}
-            </p>
+            </p> */}
           </FlexContainer>
         </Form>
       </div>

@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useSubjectStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 
 const SubjectsTable = () => {
-  const { fetchSubjects ,academicYear} = useAppContext();
+  const fetchSubjects = useSubjectStore((state) => state.fetchSubjects);
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {    
-    fetchSubjects().then((data) => {
-      setData(data);
+  useEffect(() => {
+    fetchSubjects().then((subjectsData) => {
+      setData(subjectsData);
     });
   }, [fetchSubjects]);
 
   const filteredResults = filteredData(data, searchTerm);
 
- 
   const columns = [
     {
       name: "Semester",
@@ -55,8 +54,9 @@ const SubjectsTable = () => {
       selector: (row) => row.CREDIT,
       sortable: true,
       wrap: true,
-    }
+    },
   ];
+
   let props = {
     tableName: "Subjects",
     columns,
@@ -67,7 +67,7 @@ const SubjectsTable = () => {
 
   return (
     <>
-    <TableContainer {...props} />
+      <TableContainer {...props} />
     </>
   );
 };

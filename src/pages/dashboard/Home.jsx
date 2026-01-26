@@ -2,12 +2,13 @@ import { Alert, Spin } from "antd";
 import DepartmentTable from "../../components/DepartmentTable";
 import NoticeTable from "../../components/NoticeTable";
 import TodayExam from "../../components/TodayExam";
-import { useAppContext } from "../../context/AppContext";
+import { useAllocationStore } from "../../stores";
 import "../../styles/home.css";
 
 function Home() {
-  const { deptView, isLoading } = useAppContext();
-   
+  const deptView = useAllocationStore((state) => state.deptView);
+  const isLoading = useAllocationStore((state) => state.isLoading);
+
   return (
     <div className="heightcontainer">
       <div className="tdye">

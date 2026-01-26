@@ -1,10 +1,11 @@
 import { Space, Dropdown, ConfigProvider } from "antd";
-import { useAppContext } from "../context/AppContext";
+import { useAuthStore } from "../stores";
 import { DownOutlined, UserOutlined } from "@ant-design/icons";
 import "../styles/Navbar.css";
 
 const Navbar = () => {
-  const { user, logoutUser } = useAppContext();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const items = [
     {
@@ -12,7 +13,7 @@ const Navbar = () => {
       danger: true,
       label: "Logout",
       icon: <UserOutlined />,
-      onClick: () => logoutUser(),
+      onClick: () => logout(),
     },
   ];
 
@@ -20,9 +21,9 @@ const Navbar = () => {
     <ConfigProvider
       theme={{
         token: {
-          colorText: "#07314a", 
-          colorBgContainer: "#f0f9ff", 
-          colorBgElevated: "#f0f9ff", 
+          colorText: "#07314a",
+          colorBgContainer: "#f0f9ff",
+          colorBgElevated: "#f0f9ff",
         },
       }}
     >
@@ -36,7 +37,7 @@ const Navbar = () => {
         >
           <a onClick={(e) => e.preventDefault()}>
             <Space>
-              <p className="welcomeName">Welcome, {user.username}</p>
+              <p className="welcomeName">Welcome, {user?.username}</p>
               <DownOutlined className="dropdownicon" />
             </Space>
           </a>

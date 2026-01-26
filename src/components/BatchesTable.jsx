@@ -1,23 +1,17 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useBatchStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
-import { Button } from "antd";
-import { Popconfirm } from "antd";
+import { Button, Popconfirm, Form, InputNumber, Select } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { Form } from "antd";
-import { InputNumber } from "antd";
-import { Select } from "antd";
 
 const BatchesTable = () => {
-  const {
-    fetchBatches,
-    fetchAcademicYear,
-    updateAcademicYear,
-    academicYear,
-    updateBatches,
-  } = useAppContext();
+  const fetchBatches = useBatchStore((state) => state.fetchBatches);
+  const fetchAcademicYear = useBatchStore((state) => state.fetchAcademicYear);
+  const updateAcademicYear = useBatchStore((state) => state.updateAcademicYear);
+  const academicYear = useBatchStore((state) => state.academicYear);
+  const updateBatches = useBatchStore((state) => state.updateBatches);
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,14 +20,12 @@ const BatchesTable = () => {
 
   useEffect(() => {
     fetchAcademicYear();
-  }, []);
+  }, [fetchAcademicYear]);
 
   useEffect(() => {
     if (academicYear) {
-      fetchBatches(academicYear).then((data) => {
-        console.log(data);
-        
-        setData(data);
+      fetchBatches(academicYear).then((batchData) => {
+        setData(batchData);
       });
     }
   }, [fetchBatches, academicYear]);
@@ -41,7 +33,6 @@ const BatchesTable = () => {
   const handleEdit = (key) => {
     setEditingKey(key);
     const record = data.find((item) => item.deptName === key);
-
     setEditData({ ...record });
   };
 
@@ -53,7 +44,7 @@ const BatchesTable = () => {
     await updateBatches(newData);
     setData(newData);
     setEditingKey("");
-    setEditData({}); // Clear editData
+    setEditData({});
   };
 
   const handleChange = (value, field) => {
@@ -64,6 +55,7 @@ const BatchesTable = () => {
   };
 
   const filteredResults = filteredData(data, searchTerm);
+
   const columns = [
     {
       name: "Dept",
@@ -97,7 +89,7 @@ const BatchesTable = () => {
     {
       name: "Start",
       selector: (row) =>
-        editingKey == row.deptName ? (
+        editingKey === row.deptName ? (
           <Form.Item
             rules={[
               {
@@ -126,7 +118,7 @@ const BatchesTable = () => {
     {
       name: "Reg",
       selector: (row) =>
-        editingKey == row.deptName ? (
+        editingKey === row.deptName ? (
           <Form.Item
             rules={[
               {
@@ -155,7 +147,7 @@ const BatchesTable = () => {
     {
       name: "LET",
       selector: (row) =>
-        editingKey == row.deptName ? (
+        editingKey === row.deptName ? (
           <Form.Item
             rules={[
               {
@@ -184,13 +176,12 @@ const BatchesTable = () => {
     {
       name: "Dropped",
       selector: (row) =>
-        editingKey == row.deptName ? (
+        editingKey === row.deptName ? (
           <Form.Item
             rules={[
               {
                 required: true,
                 message: "Please add Dropped students",
-                
               },
             ]}
           >
@@ -211,13 +202,13 @@ const BatchesTable = () => {
     {
       name: "Rejoined",
       selector: (row) =>
-        editingKey == row.deptName ? (
+        editingKey === row.deptName ? (
           <Form.Item
             rules={[
               {
                 required: true,
                 message: "Please add Rejoined students",
-              }
+              },
             ]}
           >
             <Select
@@ -265,7 +256,7 @@ const BatchesTable = () => {
 
   const disabledDate = (currentDate) => {
     const currentYear = dayjs().year();
-    return currentDate.year() < currentYear-1;
+    return currentDate.year() < currentYear - 1;
   };
 
   const yearChanged = async (date) => {

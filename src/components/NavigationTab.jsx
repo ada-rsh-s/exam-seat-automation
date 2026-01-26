@@ -1,53 +1,48 @@
+import { useMemo, useCallback } from "react";
 import { Segmented } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navtab.css";
+
+const pathToTab = {
+  "/": "Home",
+  "/slots": "Slots",
+  "/batches": "Batches",
+  "/subjects": "Subjects",
+  "/exam-halls": "Exam Halls",
+};
+
+const tabToPath = {
+  "Home": "/",
+  "Slots": "/slots",
+  "Batches": "/batches",
+  "Subjects": "/subjects",
+  "Exam Halls": "/exam-halls",
+};
 
 const NavigationTab = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getDefaultValue = () => {
-    switch (location.pathname) {
-      case "/":
-        return "Home";
-      case "/slots":
-        return "Slots";
-      case "/batches":
-        return "Batches";
-      case "/subjects":
-        return "Subjects";
-      case "/exam-halls":
-        return "Exam Halls";
-      default:
-        return ""; 
+  // Get the current tab based on pathname
+  const currentTab = useMemo(() => {
+    return pathToTab[location.pathname] || "Home";
+  }, [location.pathname]);
+
+  // Handle tab change - navigate to new route
+  const handleChange = useCallback((value) => {
+    const path = tabToPath[value];
+    if (path && path !== location.pathname) {
+      navigate(path);
     }
-  };
+  }, [navigate, location.pathname]);
 
   return (
     <center>
       <Segmented
         className="navigationTab"
-        defaultValue={getDefaultValue()}
+        value={currentTab}
         options={["Home", "Slots", "Batches", "Subjects", "Exam Halls"]}
-        onChange={(value) => {
-          switch (value) {
-            case "Home":
-              navigate("/");
-              break;
-            case "Slots":
-              navigate("/slots");
-              break;
-            case "Batches":
-              navigate("/batches");
-              break;
-            case "Subjects":
-              navigate("/subjects");
-              break;
-            case "Exam Halls":
-              navigate("/exam-halls");
-              break;
-          }
-        }}
+        onChange={handleChange}
       />
     </center>
   );

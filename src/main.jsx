@@ -2,14 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import ErrorHandler from "./utils/ErrorHandler";
-import { AppProvider } from "./context/AppContext.jsx";
+import AlertProvider from "./components/AlertProvider";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ErrorHandler>
-          <AppProvider>
+      <AlertProvider>
         <App />
-        </AppProvider>
+      </AlertProvider>
     </ErrorHandler>
   </React.StrictMode>
-); 
+);

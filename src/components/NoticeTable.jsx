@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useAllocationStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 import { Button } from "antd";
@@ -7,13 +7,10 @@ import { useNavigate } from "react-router-dom";
 import queryString from "query-string";
 
 const NoticeTable = () => {
-  const {
-    noticeBoardView,
-    dateTime,
-    classroomView,
-    setSingleClassView,
-    classNames,
-  } = useAppContext();
+  const noticeBoardView = useAllocationStore((state) => state.noticeBoardView);
+  const dateTime = useAllocationStore((state) => state.dateTime);
+  const classroomView = useAllocationStore((state) => state.classroomView);
+  const classNames = useAllocationStore((state) => state.classNames);
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,18 +39,16 @@ const NoticeTable = () => {
   const formatCount = (counts) => {
     return counts ? counts.join("<br /><br />") : "0";
   };
+
   const handleClick = (index) => {
     const classroomData = {
       destination: "class",
-      singleClassView: JSON.stringify(classroomView[index]), // Convert 2D array to JSON string
+      singleClassView: JSON.stringify(classroomView[index]),
       singleClassName: classNames[index],
       dateTime,
     };
 
-    // Stringify classroomData into query parameters
     const queryParams = queryString.stringify(classroomData);
-
-    // setSingleClassView(classroomView[index],classNames[index]);
     window.open(`/print?${queryParams}`, "_blank", "noopener,noreferrer");
   };
 

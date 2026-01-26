@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Button, Select, Form, Popconfirm } from "antd";
-import { useAppContext } from "../context/AppContext";
+import { useState, useEffect, useRef } from "react";
+import { Button, Select, Form, Popconfirm, InputNumber } from "antd";
+import { useBatchStore } from "../stores";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { InputNumber } from "antd";
 import FlexContainer from "../components/FlexContainer";
 
 const BatchesForm = () => {
   const navigate = useNavigate();
-  const { batchesForm, fetchExamOptions } = useAppContext();
+  const batchesForm = useBatchStore((state) => state.saveBatches);
+  const fetchExamOptions = useBatchStore((state) => state.fetchExamOptions);
 
   const [depts, setDepts] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -18,7 +18,7 @@ const BatchesForm = () => {
   const handleYearChange = async (value) => {
     setSelectedYear(value);
     try {
-      const fetchedDepts = await fetchExamOptions(value); 
+      const fetchedDepts = await fetchExamOptions(value);
       setDepts(fetchedDepts);
     } catch (error) {
       console.error("Error fetching options:", error);
@@ -171,7 +171,6 @@ const BatchesForm = () => {
                   label="Regular Strength"
                   name={`reg${dept.name}`}
                   initialValue={dept.reg}
-                  // initialValue={dept.reg || 20}
                   rules={[
                     {
                       required: true,
@@ -186,7 +185,6 @@ const BatchesForm = () => {
                     placeholder="Regular Strength"
                     style={{ width: "200px", marginRight: "40px" }}
                     value={dept.reg}
-                    // value={dept.reg || 20}
                     onChange={(value) =>
                       handleFieldChange("reg", value, dept.name)
                     }
@@ -197,7 +195,6 @@ const BatchesForm = () => {
                   label="LET Strength"
                   name={`let${dept.name}`}
                   initialValue={dept.let}
-                  // initialValue={dept.let || 20}
                   rules={[
                     { required: true, message: "Please enter LET Strength" },
                   ]}
@@ -209,7 +206,6 @@ const BatchesForm = () => {
                     placeholder="LET Strength"
                     style={{ width: "200px", marginRight: "40px" }}
                     value={dept.let}
-                    // value={dept.let || 20}
                     onChange={(value) =>
                       handleFieldChange("let", value, dept.name)
                     }
@@ -287,7 +283,6 @@ const BatchesForm = () => {
         <Form.Item>
           <Popconfirm
             onConfirm={allFieldsFilled() ? submitForm : null}
-            // onConfirm={!allFieldsFilled() ? submitForm : null}
             title="Current year exams data will be overwritten!"
             description="Are you sure you want to submit?"
             icon={<QuestionCircleOutlined style={{ color: "red" }} />}

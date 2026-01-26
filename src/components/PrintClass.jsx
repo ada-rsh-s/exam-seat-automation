@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import queryString from "query-string";
-import { useAppContext } from "../context/AppContext";
 import "../styles/Print.css";
 import { useLocation } from "react-router-dom";
 
@@ -8,7 +7,7 @@ const ClassPrint = () => {
   const location = useLocation();
   const parsedQuery = queryString.parse(location.search);
 
-  const singleClassView = JSON.parse(parsedQuery.singleClassView); // Parse back to 2D array
+  const singleClassView = JSON.parse(parsedQuery.singleClassView);
   const singleClassName = parsedQuery.singleClassName;
   const dateTime = parsedQuery.dateTime;
 
@@ -18,7 +17,7 @@ const ClassPrint = () => {
 
   const headerCount = singleClassView[0].length / 2;
 
-  const headers = Array.from({ length: headerCount }, (_, i) => [
+  const headers = Array.from({ length: headerCount }, () => [
     `Seat No`,
     `Register No`,
   ]).flat();

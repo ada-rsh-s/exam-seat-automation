@@ -1,10 +1,10 @@
-import React from "react";
-import { useAppContext } from "../context/AppContext";
-import "../styles/Printdept.css"; // Add your custom CSS here
 import { useEffect } from "react";
+import { useAllocationStore } from "../stores";
+import "../styles/Printdept.css";
 
 const PrintNotice = () => {
-  const { noticeBoardView,dateTime } = useAppContext();
+  const noticeBoardView = useAllocationStore((state) => state.noticeBoardView);
+  const dateTime = useAllocationStore((state) => state.dateTime);
 
   const createItemPairs = (items) => {
     let pairs = [];
@@ -15,8 +15,8 @@ const PrintNotice = () => {
       pairs.push(`${items[items.length - 1]} - ${items[items.length - 1]}`);
     }
     return pairs;
-    };
-    
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       window.print();

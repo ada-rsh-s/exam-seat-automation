@@ -25,7 +25,8 @@
     "react-router-dom": "^7.4.1",
     "react-sticky-footer": "0.1.0-rc3",
     "swiper": "^11.2.6",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",

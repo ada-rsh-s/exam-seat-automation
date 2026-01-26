@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useAllocationStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 import { Button } from "antd";
@@ -7,8 +7,10 @@ import { useNavigate } from "react-router-dom";
 import queryString from "query-string";
 
 const DepartmentTable = () => {
-  const { deptView, attendanceView, dateTime, setSingleAttendance } =
-    useAppContext();
+  const deptView = useAllocationStore((state) => state.deptView);
+  const attendanceView = useAllocationStore((state) => state.attendanceView);
+  const dateTime = useAllocationStore((state) => state.dateTime);
+
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,13 +40,11 @@ const DepartmentTable = () => {
   const handleClick = (index) => {
     const attendData = {
       destination: "attendance",
-      singleAttendanceView: JSON.stringify(attendanceView[index]), 
+      singleAttendanceView: JSON.stringify(attendanceView[index]),
       dateTime,
     };
 
     const queryParams = queryString.stringify(attendData);
-
-    // setSingleAttendance(attendanceView[index]);
     window.open(`/print?${queryParams}`, "_blank", "noopener,noreferrer");
   };
 
@@ -90,13 +90,12 @@ const DepartmentTable = () => {
         <>
           {row.indexes.map((index, idx) => (
             <Button
-              key={idx} // Add a unique key for each button
+              key={idx}
               className="printbutton attendancebutton"
-              onClick={() => handleClick(index, idx)} // Pass the index of the button
+              onClick={() => handleClick(index, idx)}
               type="primary"
             >
-              {row.dept} Attendance Sheet {idx + 1}{" "}
-              {/* Use the index as the label */}
+              {row.dept} Attendance Sheet {idx + 1}
             </Button>
           ))}
         </>

@@ -2,23 +2,24 @@ import { EditOutlined } from "@ant-design/icons";
 import { Button, DatePicker, Popconfirm, Select } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useSlotStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
 
 const { RangePicker } = DatePicker;
 
 const SlotsTable = () => {
-  const { fetchSlots, updateSlots } = useAppContext();
+  const fetchSlots = useSlotStore((state) => state.fetchSlots);
+  const updateSlots = useSlotStore((state) => state.updateSlots);
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingKey, setEditingKey] = useState("");
   const [editData, setEditData] = useState({});
 
-  useEffect(() => {    
-    fetchSlots().then((data) => {      
-      setData(data);
+  useEffect(() => {
+    fetchSlots().then((slotsData) => {
+      setData(slotsData);
     });
   }, [fetchSlots]);
 
@@ -27,7 +28,7 @@ const SlotsTable = () => {
   const handleEdit = (key) => {
     setEditingKey(key);
     const record = data.find((item) => item.Slot === key);
-    setEditData({ ...record }); 
+    setEditData({ ...record });
   };
 
   const handleSave = async () => {
@@ -38,7 +39,7 @@ const SlotsTable = () => {
     await updateSlots(newData);
     setData(newData);
     setEditingKey("");
-    setEditData({}); // Clear editData
+    setEditData({});
   };
 
   const handleChange = (value, field) => {
@@ -51,7 +52,7 @@ const SlotsTable = () => {
   const handleDateRangeChange = (value) => {
     setEditData((prev) => ({
       ...prev,
-      Date: value, 
+      Date: value,
     }));
   };
 
@@ -106,7 +107,6 @@ const SlotsTable = () => {
         ),
       wrap: true,
       width: "450px",
-
       sortable: true,
     },
     {
@@ -121,7 +121,7 @@ const SlotsTable = () => {
               title="Cancel editing?"
               onConfirm={() => {
                 setEditingKey("");
-                setEditData({}); // Clear editData on cancel
+                setEditData({});
               }}
             >
               <Button type="primary" style={{ marginLeft: 8 }} danger>

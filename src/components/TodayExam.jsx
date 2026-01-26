@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Collapse,
   ConfigProvider,
@@ -8,28 +8,28 @@ import {
   Popconfirm,
 } from "antd";
 import { CaretRightOutlined } from "@ant-design/icons";
-import { useAppContext } from "../context/AppContext";
+import { useAllocationStore, useSlotStore } from "../stores";
 import { test } from "../utils/seatAllocator";
 
 const TodayExam = () => {
-  const {
-    fetchExamData,
-    fetchslotNames,
-    slots,
-    classCapacity,
-    deptStrength,
-    letStrength,
-    exams,
-    drop,
-    rejoin,
-    deptStart,
-    examToday,
-    setAllocatedData,
-    selectedSlotName,
-    deptView,
-    seatingExists,
-    deleteAllocatedSlot,
-  } = useAppContext();
+  // Zustand stores
+  const slots = useSlotStore((state) => state.slots);
+  const fetchSlotNames = useSlotStore((state) => state.fetchSlotNames);
+
+  const classCapacity = useAllocationStore((state) => state.classCapacity);
+  const deptStrength = useAllocationStore((state) => state.deptStrength);
+  const letStrength = useAllocationStore((state) => state.letStrength);
+  const exams = useAllocationStore((state) => state.exams);
+  const drop = useAllocationStore((state) => state.drop);
+  const rejoin = useAllocationStore((state) => state.rejoin);
+  const deptStart = useAllocationStore((state) => state.deptStart);
+  const examToday = useAllocationStore((state) => state.examToday);
+  const selectedSlotName = useAllocationStore((state) => state.selectedSlotName);
+  const deptView = useAllocationStore((state) => state.deptView);
+  const fetchExamData = useAllocationStore((state) => state.fetchExamData);
+  const setAllocatedData = useAllocationStore((state) => state.setAllocatedData);
+  const seatingExists = useAllocationStore((state) => state.seatingExists);
+  const deleteAllocatedSlot = useAllocationStore((state) => state.deleteAllocatedSlot);
 
   const [slotNames, setSlotNames] = useState([]);
   const [savedClasses, setSavedClasses] = useState(null);
@@ -88,7 +88,7 @@ const TodayExam = () => {
       exams &&
       drop &&
       rejoin &&
-      examToday && 
+      examToday &&
       deptStart &&
       selectedSlotName
     ) {
@@ -111,7 +111,7 @@ const TodayExam = () => {
           setSavedData(null);
           setAllocatedData(allocatedData, selectedSlotName);
         } catch (e) {
-          console.log(e);
+          console.error(e);
           setAllocatedData(undefined);
         }
       }
@@ -127,17 +127,19 @@ const TodayExam = () => {
     selectedSlotName,
     savedClasses,
     savedData,
+    deptStart,
+    slotChanged,
+    setAllocatedData,
   ]);
 
   useEffect(() => {
-    fetchslotNames().then((fetchedSlotNames) => {
+    fetchSlotNames().then((fetchedSlotNames) => {
       setSlotNames(fetchedSlotNames);
     });
-  }, []);
+  }, [fetchSlotNames]);
 
   useEffect(() => {
     if (isModalVisible) {
-      // Reset countdown when modal is shown
       setCountdown(5);
       setCancelButtonDisabled(true);
 
@@ -145,16 +147,16 @@ const TodayExam = () => {
         setCountdown((prevCountdown) => {
           if (prevCountdown === 1) {
             setCancelButtonDisabled(false);
-            clearInterval(intervalId); // Stop the interval when countdown finishes
+            clearInterval(intervalId);
             return 0;
           }
           return prevCountdown - 1;
         });
       }, 1000);
 
-      return () => clearInterval(intervalId); // Cleanup on modal close
+      return () => clearInterval(intervalId);
     }
-  }, [isModalVisible]); // Re-run when the modal visibility changes
+  }, [isModalVisible]);
 
   const items = [
     {
@@ -245,8 +247,8 @@ const TodayExam = () => {
       <Modal
         title="Seating exists! Create a new one?"
         open={isModalVisible}
-        onOk={() => submitSlot(currentSlot, true)} // Triggered when "Use Existing" is clicked
-        closable={false} // Remove the close (X) button
+        onOk={() => submitSlot(currentSlot, true)}
+        closable={false}
         maskClosable={false}
         okButtonProps={{
           style: {
@@ -257,11 +259,11 @@ const TodayExam = () => {
         }}
         cancelButtonProps={{
           style: {
-            backgroundColor: cancelButtonDisabled ? "#b5b5b5" : "#55c2da", // Disable color
+            backgroundColor: cancelButtonDisabled ? "#b5b5b5" : "#55c2da",
             borderColor: cancelButtonDisabled ? "#b5b5b5" : "#55c2da",
             color: cancelButtonDisabled ? "#888" : "white",
           },
-          disabled: cancelButtonDisabled, // Ensure the button is fully disabled and not clickable
+          disabled: cancelButtonDisabled,
         }}
         okText="Use Existing"
         cancelText={
@@ -269,11 +271,11 @@ const TodayExam = () => {
             ? `Yes, create new (${countdown}s)`
             : "Yes, create new"
         }
-        onCancel={() => submitSlot(currentSlot, false)} // Trigger when clicking "Yes, create new"
+        onCancel={() => submitSlot(currentSlot, false)}
       >
         <div style={{ textAlign: "right" }}>
           <Button
-            onClick={() => setIsModalVisible(false)} // Close the modal manually
+            onClick={() => setIsModalVisible(false)}
             style={{
               position: "absolute",
               top: 10,
@@ -288,7 +290,6 @@ const TodayExam = () => {
             X
           </Button>
         </div>
-        {/* Modal content */}
       </Modal>
     </ConfigProvider>
   );

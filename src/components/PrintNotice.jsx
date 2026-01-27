@@ -6,6 +6,33 @@ const PrintNotice = () => {
   const noticeBoardView = useAllocationStore((state) => state.noticeBoardView);
   const dateTime = useAllocationStore((state) => state.dateTime);
 
+  /**
+   * Parse dateTime string to extract session info
+   * Format: "DD-MM-YYYY - DD-MM-YYYY | hh:mm A - hh:mm A"
+   * Returns FN (Forenoon) or AN (Afternoon)
+   */
+  const parseDateTime = (dtString) => {
+    if (!dtString) return { dateRange: "", session: "" };
+
+    const parts = dtString.split(" | ");
+    const dateRange = parts[0] || "";
+    const timeRange = parts[1] || "";
+
+    // Determine session based on time - FN (Forenoon) or AN (Afternoon)
+    let session = "";
+    if (timeRange) {
+      const startTime = timeRange.split(" - ")[0];
+      if (startTime) {
+        const hour = parseInt(startTime.split(":")[0]);
+        const isPM = startTime.toLowerCase().includes("pm");
+        const hour24 = isPM && hour !== 12 ? hour + 12 : hour;
+        session = hour24 < 12 ? "FN" : "AN";
+      }
+    }
+
+    return { dateRange, timeRange, session };
+  };
+
   const createItemPairs = (items) => {
     let pairs = [];
     for (let i = 0; i < items.length - 1; i += 2) {
@@ -25,19 +52,22 @@ const PrintNotice = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const { dateRange, timeRange, session } = parseDateTime(dateTime);
+
   return (
-    <div className="noticeBoard">
-      <center>
-        {" "}
-        <h2>JYOTHI ENGINEERING COLLEGE</h2>
-        <h3>SEATING ARRANGEMENTS</h3>
-      </center>
+    <div className="print-container">
+      {/* College Header */}
+      <div className="college-header">
+        <h2 className="college-name">JYOTHI ENGINEERING COLLEGE (AUTONOMOUS), CHERUTHURUTHY</h2>
+        <h3 className="exam-title">SEATING ARRANGEMENTS</h3>
+      </div>
 
       <table className="table">
         <thead>
+          {/* Date and Session Row */}
           <tr>
-            <th colSpan={3} style={{ textAlign: "center" }}>
-              {dateTime}
+            <th colSpan={3}>
+              {dateRange} {session && `(${session})`} {timeRange && `| ${timeRange}`}
             </th>
           </tr>
           <tr>

@@ -1,33 +1,119 @@
+/* Print Container */
+.print-container {
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  color: #000;
+}
+
+/* Table Styling */
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
+  margin: 10px 0;
   font-family: Arial, sans-serif;
-  background-color: #fff; /* Set white background */
+  background-color: #fff;
 }
 
 .table th,
 .table td {
   border: 1px solid #000;
-  padding: 10px;
+  padding: 8px 10px;
   text-align: left;
-  color: #000; /* Set black font color */
+  color: #000;
+}
+
+.table th {
+  text-align: center;
+  font-weight: bold;
 }
 
 .table td {
   font-size: 14px;
-  color: #000; /* Ensure text is black for table cells */
 }
 
-/* Make only the first column with class names bold */
+/* Make first column with class names bold */
 .table td.class-column {
   font-weight: bold;
   vertical-align: middle;
 }
-.noticeBoard h2{
-  margin-top: -5px;
-  margin-bottom: -20px;
+
+/* College Header */
+.college-header {
+  text-align: center;
+  margin-bottom: 10px;
 }
-.noticeBoard h3{
+
+.college-header .college-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  text-transform: uppercase;
+}
+
+.college-header .exam-title {
+  font-size: 14px;
   text-decoration: underline;
+  margin: 5px 0;
+  font-weight: bold;
+}
+
+.college-header .class-room-info {
+  font-size: 13px;
+  margin: 5px 0;
+}
+
+/* Attendance Sheet */
+.attendance-sheet .table th,
+.attendance-sheet .table td {
+  text-align: center;
+}
+
+.attendance-sheet .table td.class-column {
+  text-align: left;
+}
+
+.signature-cell {
+  min-height: 40px;
+  height: 40px;
+}
+
+/* Footer Section */
+.attendance-footer {
+  margin-top: 0;
+}
+
+.footer-table {
+  border-collapse: collapse;
+}
+
+.footer-table td {
+  border: 1px solid #000;
+  padding: 10px;
+  min-height: 35px;
+}
+
+/* Print Styles */
+@media print {
+  .print-container {
+    margin: 0;
+    padding: 0;
+  }
+
+  .college-header {
+    margin-top: 0;
+  }
+
+  .table {
+    margin: 10px 0;
+    page-break-inside: auto;
+  }
+
+  .table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .attendance-footer {
+    page-break-inside: avoid;
+  }
 }

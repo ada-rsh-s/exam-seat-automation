@@ -7,26 +7,50 @@ const PrintAttendance = () => {
 
   const singleAttendanceView = JSON.parse(parsedQuery.singleAttendanceView);
   const { dateTime } = parsedQuery;
-  const [dateArray, setDateArray] = useState([]);
+  const [dateSessionArray, setDateSessionArray] = useState([]);
+
+  /**
+   * Determine session type based on time string
+   * Returns FN (Forenoon) or AN (Afternoon)
+   */
+  const getSessionType = (timeStr) => {
+    if (!timeStr) return "";
+    const hour = parseInt(timeStr.split(":")[0]);
+    const isPM = timeStr.toLowerCase().includes("pm");
+    const hour24 = isPM && hour !== 12 ? hour + 12 : hour;
+    return hour24 < 12 ? "FN" : "AN";
+  };
 
   useEffect(() => {
-    const dateRange = dateTime.split(" | ")[0];
-    const [startDate, endDate] = dateRange
+    if (!dateTime) return;
+
+    const parts = dateTime.split(" | ");
+    const dateRange = parts[0] || "";
+    const timeRange = parts[1] || "";
+
+    const [startDateStr, endDateStr] = dateRange
       .split(" - ")
       .map((date) => date.split("-").reverse().join("-"));
 
+    // Get session type from time
+    const startTime = timeRange.split(" - ")[0] || "";
+    const sessionType = getSessionType(startTime);
+
     const generatedDates = [];
     for (
-      let d = new Date(startDate);
-      d <= new Date(endDate);
+      let d = new Date(startDateStr);
+      d <= new Date(endDateStr);
       d.setDate(d.getDate() + 1)
     ) {
       const day = d.getDate().toString().padStart(2, "0");
       const month = (d.getMonth() + 1).toString().padStart(2, "0");
       const year = d.getFullYear().toString().slice(-2);
-      generatedDates.push(`${day}-${month}-${year}`);
+      generatedDates.push({
+        date: `${day}-${month}-${year}`,
+        session: sessionType,
+      });
     }
-    setDateArray(generatedDates);
+    setDateSessionArray(generatedDates);
   }, [dateTime]);
 
   useEffect(() => {
@@ -36,35 +60,30 @@ const PrintAttendance = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Extract class and room info
+  const classInfo = singleAttendanceView[0]?.deptRoom?.substring(0, 4) || "";
+  const roomInfo = singleAttendanceView[0]?.deptRoom?.slice(4) || "";
+
   return (
-    <>
-      <table style={{ width: "90%", marginLeft: "60px" }} className="table">
+    <div className="print-container attendance-sheet">
+      {/* College Header */}
+      <div className="college-header">
+        <h2 className="college-name">JYOTHI ENGINEERING COLLEGE (AUTONOMOUS), CHERUTHURUTHY</h2>
+        <h3 className="exam-title">ATTENDANCE SHEET</h3>
+        <p className="class-room-info">
+          <strong>Class: {classInfo}</strong> | <strong>Room: {roomInfo}</strong>
+        </p>
+      </div>
+
+      {/* Main Table - Student Data Only */}
+      <table style={{ width: "95%", margin: "0 auto" }} className="table">
         <thead>
           <tr>
-            <th colSpan={2 + dateArray.length} style={{ textAlign: "center" }}>
-              <strong>JYOTHI ENGINEERING COLLEGE, CHERUTHURUTHY</strong>
-            </th>
-          </tr>
-          <tr>
-            <th
-              colSpan={2 + dateArray.length}
-              style={{ textAlign: "center", padding: "5px" }}
-            >
-              <strong>
-                Class: {singleAttendanceView[0].deptRoom.substring(0, 4)}
-              </strong>{" "}
-              |{" "}
-              <strong>Room: {singleAttendanceView[0].deptRoom.slice(4)}</strong>
-            </th>
-          </tr>
-          <tr>
-            <th width="250" className="header-column">
-              Sl No
-            </th>
-            <th width="200" className="header-column">Register Number</th>
-            {dateArray.map((date) => (
-              <th key={date} className="header-column">
-                {date}
+            <th width="60">Sl No</th>
+            <th width="180">Register Number</th>
+            {dateSessionArray.map(({ date, session }, idx) => (
+              <th key={`header-${idx}`}>
+                {date} ({session})
               </th>
             ))}
           </tr>
@@ -73,44 +92,49 @@ const PrintAttendance = () => {
         <tbody>
           {singleAttendanceView.map((item, index) => (
             <tr key={item.slNo}>
-              <td>{index + 1}</td>
+              <td style={{ textAlign: "center" }}>{index + 1}</td>
               <td className="class-column">{item.regNo}</td>
-              {dateArray.map((date) => (
-                <td key={`${item.regNo}-${date}`} className="class-column"></td>
+              {dateSessionArray.map((_, idx) => (
+                <td key={`${item.regNo}-${idx}`}></td>
               ))}
             </tr>
           ))}
-          <tr key="regabs">
-            <td>
-              <strong>Register number of absentees</strong>
-            </td>
-            <td></td>
-
-            {dateArray.map((_, idx) => (
-              <td key={`regabs-${idx}`}></td>
-            ))}
-          </tr>
-          <tr key="facname">
-            <td>
-              <strong>Name of faculty</strong>
-            </td>
-            <td> </td>
-            {dateArray.map((_, idx) => (
-              <td key={`facname-${idx}`}></td>
-            ))}{" "}
-          </tr>
-          <tr key="facsign">
-            <td>
-              <strong>Signature of faculty</strong>
-            </td>
-            <td> </td>
-            {dateArray.map((_, idx) => (
-              <td key={`facsign-${idx}`}></td>
-            ))}{" "}
-          </tr>
         </tbody>
       </table>
-    </>
+
+      {/* Footer Section */}
+      <div className="attendance-footer" style={{ width: "95%", margin: "0 auto" }}>
+        {/* Absentee Register Numbers Section */}
+        <table className="table footer-table">
+          <tbody>
+            <tr>
+              <td width="240">
+                <strong>Register No. of Absentees</strong>
+              </td>
+              {dateSessionArray.map((_, idx) => (
+                <td key={`abs-${idx}`}></td>
+              ))}
+            </tr>
+            <tr>
+              <td width="240">
+                <strong>Name of Faculty</strong>
+              </td>
+              {dateSessionArray.map((_, idx) => (
+                <td key={`fac-${idx}`}></td>
+              ))}
+            </tr>
+            <tr>
+              <td width="240">
+                <strong>Signature of Faculty</strong>
+              </td>
+              {dateSessionArray.map((_, idx) => (
+                <td key={`sig-${idx}`} className="signature-cell"></td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

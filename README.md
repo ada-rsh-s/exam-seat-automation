@@ -1,6 +1,6 @@
 # AsientoMatic - Exam Seat Automation System
 
-> **AsientoMatic** automates exam seat allocation for Jyothi Engineering College, streamlining the process of assigning students to exam halls based on department, subjects, and available classrooms.
+> **AsientoMatic** automates exam seat allocation for JYOTHI ENGINEERING COLLEGE (AUTONOMOUS), streamlining the process of assigning students to exam halls based on department, subjects, and available classrooms.
 
 ## 📋 Table of Contents
 - [Overview](#overview)
@@ -437,7 +437,7 @@ Contributions are welcome! To contribute:
 
 ## 📄 License
 
-This project is developed for Jyothi Engineering College.
+This project is developed for JYOTHI ENGINEERING COLLEGE (AUTONOMOUS).
 
 ---
 
@@ -466,4 +466,4 @@ For issues or questions, please contact the development team or create an issue 
 
 ---
 
-**Built with ❤️ for Jyothi Engineering College**
+**Built with ❤️ for JYOTHI ENGINEERING COLLEGE (AUTONOMOUS)**

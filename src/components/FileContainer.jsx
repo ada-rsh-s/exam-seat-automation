@@ -1,12 +1,11 @@
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import { Alert, Button, Popconfirm, Progress, Upload } from "antd";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import { useAppContext } from "../context/AppContext";
+import { useSubjectStore, useExamHallStore } from "../stores";
 import FlexContainer from "./FlexContainer";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import queryString from "query-string";
-import { useNavigate } from "react-router-dom";
 
 const FileContainer = () => {
   const location = useLocation();
@@ -16,17 +15,18 @@ const FileContainer = () => {
   const [workbook, setWorkbook] = useState(null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(true);
-  const cancelToken = useRef(true); // Ref to manage cancellation
+  const cancelToken = useRef(true);
 
-  const { uploadSubFile, uploadExamhallFile } = useAppContext();
+  const uploadSubFile = useSubjectStore((state) => state.uploadSubFile);
+  const uploadExamhallFile = useExamHallStore((state) => state.uploadExamhallFile);
 
   const handleFileUpload = (file) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      setWorkbook(workbook);
+      const wb = XLSX.read(data, { type: "array" });
+      setWorkbook(wb);
     };
 
     reader.readAsArrayBuffer(file);
@@ -58,13 +58,12 @@ const FileContainer = () => {
       }
     } catch (error) {
       setUploading(true);
-
       console.error("Error uploading file:", error);
     }
   };
 
   const handleCancel = () => {
-    cancelToken.current = false; // Cancel the upload
+    cancelToken.current = false;
   };
 
   return (

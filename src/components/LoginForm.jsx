@@ -1,9 +1,8 @@
-import  { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
-import { useAppContext } from "../context/AppContext";
-import { useEffect } from "react";
+import { useAuthStore } from "../stores";
 import FlexContainer from "./FlexContainer";
 
 const initialState = {
@@ -11,13 +10,18 @@ const initialState = {
   email: "",
   password: "",
   isMember: true,
-};      
+};
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-
   const [values, setValues] = useState(initialState);
+
+  // Zustand store
+  const user = useAuthStore((state) => state.user);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const login = useAuthStore((state) => state.login);
+  const register = useAuthStore((state) => state.register);
 
   const toggleMember = () => {
     setValues({
@@ -25,31 +29,18 @@ const LoginForm = () => {
       isMember: !values.isMember,
     });
   };
-  const {
-    user,
-    isLoading,
-    setupUser,
-  } = useAppContext();
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
   };
 
-
-  const onFinish = () => {
+  const onFinish = async () => {
     const { username, email, password, isMember } = values;
 
-    const currentUser = { username, email, password };
     if (isMember) {
-      setupUser({
-        currentUser,
-        endPoint: "login",
-      });
+      await login(email, password);
     } else {
-      setupUser({
-        currentUser,
-        endPoint: "register",
-      });
+      await register(username, email, password);
     }
   };
 
@@ -65,7 +56,7 @@ const LoginForm = () => {
     <>
       <div className="txtb">
         {values.isMember ? <h3>Login</h3> : <h3>Register</h3>}
-       <br />
+        <br />
         <Form
           form={form}
           name="horizontal_login"
@@ -84,7 +75,6 @@ const LoginForm = () => {
               name="email"
               onChange={handleChange}
               placeholder="Email"
-              // required
             />
           </Form.Item>
 
@@ -120,7 +110,7 @@ const LoginForm = () => {
               name="password"
               onChange={handleChange}
               placeholder="Password"
-              autocomplete="new-password"
+              autoComplete="new-password"
               required
             />
           </Form.Item>
@@ -135,8 +125,8 @@ const LoginForm = () => {
               {isLoading
                 ? "Please Wait 🌞"
                 : values.isMember
-                ? "Login"
-                : "Register"}
+                  ? "Login"
+                  : "Register"}
             </Button>
           </Form.Item>
 

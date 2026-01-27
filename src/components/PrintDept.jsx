@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useEffect } from "react";
+import { useAllocationStore } from "../stores";
 import "../styles/Printdept.css";
 
 const PrintDept = () => {
-  const { deptView, dateTime } = useAppContext();
+  const deptView = useAllocationStore((state) => state.deptView);
+  const dateTime = useAllocationStore((state) => state.dateTime);
 
   const createItemPairs = (items) => {
     let pairs = [];
@@ -25,7 +26,7 @@ const PrintDept = () => {
 
   return (
     <div>
-      {deptView.length>=0 && (
+      {deptView.length >= 0 && (
         <table className="table">
           <thead>
             <tr>

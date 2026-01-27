@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useExamHallStore } from "../stores";
 import { filteredData } from "../utils/dataSearch";
 import TableContainer from "./TableContainer";
-import { Button } from "antd";
-import { Popconfirm } from "antd";
+import { Button, Popconfirm, InputNumber, Form } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { InputNumber } from "antd";
-import { Form } from "antd";
 
 const ExamHallTable = () => {
-  const { fetchExamHalls, allotExamHall, updateExamHalls } = useAppContext();
+  const fetchExamHalls = useExamHallStore((state) => state.fetchExamHalls);
+  const allotExamHall = useExamHallStore((state) => state.allotExamHall);
+  const updateExamHalls = useExamHallStore((state) => state.updateExamHalls);
 
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +20,7 @@ const ExamHallTable = () => {
     fetchExamHalls().then((fetchedData) => {
       setData(fetchedData);
       const defaultSelectedRows = fetchedData.filter(
-        (row) => row.alloted == true
+        (row) => row.alloted === true
       );
       setPreselectedRows(defaultSelectedRows);
     });
@@ -30,14 +29,11 @@ const ExamHallTable = () => {
   const handleEdit = (key) => {
     setEditingKey(key);
     const record = data.find((item) => item.Hall === key);
-
     setEditData({ ...record });
   };
 
   const handleSave = async () => {
     const { Hall, rowcol, currCapacity } = editData;
-
-    console.log(editData);
 
     if (
       Hall.replace(/\s/g, "") === "WAB412" ||
@@ -60,7 +56,6 @@ const ExamHallTable = () => {
       rowcol[1] = columns;
     } else {
       editData.currCapacity = editData.currCapacity * 2;
-
       rowcol[0] = Math.floor(currCapacity);
       rowcol[1] = 2;
     }
@@ -68,7 +63,6 @@ const ExamHallTable = () => {
     const newData = data.map((item) =>
       item.Hall === editingKey ? editData : item
     );
-    console.log(newData);
 
     await updateExamHalls(newData);
     setData(newData);
@@ -95,7 +89,7 @@ const ExamHallTable = () => {
     {
       name: "Current Capacity",
       selector: (row) =>
-        editingKey == row.Hall ? (
+        editingKey === row.Hall ? (
           <Form.Item
             initialValue={editData.currCapacity}
             rules={[
@@ -110,7 +104,7 @@ const ExamHallTable = () => {
               min={0}
               max={
                 row.Hall.replace(/\s/g, "") === "WAB412" ||
-                row.Hall.replace(/\s/g, "") === "EAB310"
+                  row.Hall.replace(/\s/g, "") === "EAB310"
                   ? row.accCapacity
                   : row.accCapacity / 2
               }
@@ -183,6 +177,7 @@ const ExamHallTable = () => {
       await allotExamHall(newSelectedRows);
     }
   };
+
   let props = {
     tableName: "Exam Halls",
     columns,

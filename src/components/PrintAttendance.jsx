@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAppContext } from "../context/AppContext";
 import "../styles/Printdept.css";
 import queryString from "query-string";
 
@@ -9,14 +8,13 @@ const PrintAttendance = () => {
   const singleAttendanceView = JSON.parse(parsedQuery.singleAttendanceView);
   const { dateTime } = parsedQuery;
   const [dateArray, setDateArray] = useState([]);
+
   useEffect(() => {
-    // Extract and process the date range
     const dateRange = dateTime.split(" | ")[0];
     const [startDate, endDate] = dateRange
       .split(" - ")
-      .map((date) => date.split("-").reverse().join("-")); // Convert to YYYY-MM-DD
+      .map((date) => date.split("-").reverse().join("-"));
 
-    // Generate the array of dates
     const generatedDates = [];
     for (
       let d = new Date(startDate);
@@ -25,11 +23,11 @@ const PrintAttendance = () => {
     ) {
       const day = d.getDate().toString().padStart(2, "0");
       const month = (d.getMonth() + 1).toString().padStart(2, "0");
-      const year = d.getFullYear().toString().slice(-2); // Extract last 2 digits of the year
+      const year = d.getFullYear().toString().slice(-2);
       generatedDates.push(`${day}-${month}-${year}`);
     }
     setDateArray(generatedDates);
-  }, [dateTime]); // Dependencies ensure this runs once
+  }, [dateTime]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -86,10 +84,10 @@ const PrintAttendance = () => {
             <td>
               <strong>Register number of absentees</strong>
             </td>
-            <td ></td>
+            <td></td>
 
-            {dateArray.map(() => (
-              <td></td>
+            {dateArray.map((_, idx) => (
+              <td key={`regabs-${idx}`}></td>
             ))}
           </tr>
           <tr key="facname">
@@ -97,8 +95,8 @@ const PrintAttendance = () => {
               <strong>Name of faculty</strong>
             </td>
             <td> </td>
-            {dateArray.map(() => (
-              <td></td>
+            {dateArray.map((_, idx) => (
+              <td key={`facname-${idx}`}></td>
             ))}{" "}
           </tr>
           <tr key="facsign">
@@ -106,8 +104,8 @@ const PrintAttendance = () => {
               <strong>Signature of faculty</strong>
             </td>
             <td> </td>
-            {dateArray.map(() => (
-              <td></td>
+            {dateArray.map((_, idx) => (
+              <td key={`facsign-${idx}`}></td>
             ))}{" "}
           </tr>
         </tbody>
